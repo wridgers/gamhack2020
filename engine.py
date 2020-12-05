@@ -1,11 +1,17 @@
 import logging
 import os
+import random
 import sqlite3
 import subprocess
 
 import pexpect
 
 LOGGER = logging.getLogger(__name__)
+
+BOTS = {
+	'always_rock',
+	'random_play',
+}
 
 
 class GameException(Exception):
@@ -138,9 +144,10 @@ def setupdb():
 
 
 def main():
-	p1_bot_name = 'always_rock'
-	p2_bot_name = 'random_play'
+	bots = list(BOTS)
+	random.shuffle(bots)
 
+	p1_bot_name, p2_bot_name = bots[:2]
 	rounds = 50
 
 	p1 = pexpect.spawn('docker run -i -v %s/bots:/bots -w /bots python:3.8 python -u -m %s' % (os.getcwd(), p1_bot_name))
