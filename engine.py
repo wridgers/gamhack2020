@@ -127,6 +127,14 @@ class GameGen2(BaseGame):
 	pass
 
 
+class P1FoulException(Exception):
+	pass
+
+
+class P2FoulException(Exception):
+	pass
+
+
 class Engine:
 	TIMEOUT = 100
 
@@ -182,38 +190,48 @@ class Engine:
 		self.run_pairing(random.sample(self.players, 2))
 
 	def run_pairing(self, player_names):
-		assert len(player_names) == 2
-		LOGGER.info('p1: %s, p2: %s', *player_names)
+		try:
+			assert len(player_names) == 2
+			LOGGER.info('p1: %s, p2: %s', *player_names)
 
-		players = [
-			pexpect.spawn('python -u -m bots.%s' % (player_name,), timeout=self.TIMEOUT / 1e3)
-			for player_name in player_names
-		]
+			players = [
+				pexpect.spawn('python -u -m bots.%s' % (player_name,), timeout=self.TIMEOUT / 1e3)
+				for player_name in player_names
+			]
 
-		game = self.game_class(self.rounds)
-		for player in players:
-			self.write_json(player, self.game_header(player_names))
-
-		for idx, player in enumerate(players):
-			assert self.read_json(player)['ready']
-			LOGGER.info('p%s ready', idx + 1)
-
-		for i in range(self.rounds):
+			game = self.game_class(self.rounds)
 			for player in players:
-				self.write_json(player, self.round_header(i + 1))
+				self.write_json(player, self.game_header(player_names))
 
-			moves = []
+			for idx, player in enumerate(players):
+				assert self.read_json(player)['ready']
+				LOGGER.info('p%s ready', idx + 1)
+
+			for i in range(self.rounds):
+				for player in players:
+					self.write_json(player, self.round_header(i + 1))
+
+				moves = []
+				for player in players:
+					moves.append(self.read_json(player)['hand'][0])
+
+				LOGGER.info('p1_move=%r, p2_move=%r', *moves)
+
+				game.apply(*moves)
+
 			for player in players:
-				moves.append(self.read_json(player)['hand'][0])
+				player.expect(pexpect.EOF)
 
-			LOGGER.info('p1_move=%r, p2_move=%r', *moves)
+			scores = game.final_scores()
 
-			game.apply(*moves)
+		except P1FoulException:
+			LOGGER.info('p1 fouled. bad p1')
+			scores = [self.FOUL_COST, self.FOUL_WIN]
 
-		for player in players:
-			player.expect(pexpect.EOF)
+		except P2FoulException:
+			LOGGER.info('p2 fouled. bad p2')
+			scores = [self.FOUL_WIN, self.FOUL_COST]
 
-		scores = game.final_scores()
 		LOGGER.info('p1_score=%r, p2_score=%r', *scores)
 
 		save_result(self.tournament_id, 0, player_names[0], scores[0], player_names[1], scores[1])
