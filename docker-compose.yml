@@ -7,3 +7,15 @@ services:
       - ./www:/usr/share/nginx/html:ro
     ports:
       - 8080:80
+
+  arena:
+    build:
+      args:
+        user: user
+        group: user
+        uid: 1000
+        gid: 1000
+      context: .
+    volumes:
+      - ./:/code
+    command: ["bash", "arena.sh"]
