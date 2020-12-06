@@ -144,7 +144,7 @@ class Engine:
 		self.tournament_id = tournament_id
 		self.players = []
 
-		self.rounds = 50
+		self.rounds = 5
 
 	def game_header(self, player_names):
 		return {
@@ -175,19 +175,43 @@ class Engine:
 		LOGGER.info("Data read: %s", data)
 		return json.loads(data)
 
-	def add_players(self):
-		module_re = re.compile('^[a-z][a-z_]+$')
+	def get_players(self):
+		module_re = re.compile('^[a-z0-9][a-z0-9_]+$')
 		with os.scandir('bots') as it:
 			for entry in it:
-				if not entry.is_dir() or not module_re.match(entry.name):
-					LOGGER.info("skipping %s", entry.name)
+				if not entry.is_dir(follow_symlinks=True):
+					LOGGER.info("skipping %s (not dir)", entry.name)
+					continue
+				elif not module_re.match(entry.name):
+					LOGGER.info("skipping %s (bad name)", entry.name)
 					continue
 				LOGGER.info("adding %s", entry.name)
-				self.players.append(entry.name)
+				yield entry.name
 
 	def run(self):
-		self.add_players()
-		self.run_pairing(random.sample(self.players, 2))
+		players = list(self.get_players())
+		random.shuffle(players)
+		while len(players) > 1:
+			next_players = []
+			for i in range(len(players) // 2):
+				round_players = players[i*2:i*2+2]
+				LOGGER.info("Pairing %s against %s", *round_players)
+				winner = self.run_pairing(round_players)
+				if winner > 0:
+					winning_player = round_players[winner - 1]
+					LOGGER.info("Round winner: %s", winning_player)
+					next_players.append(winning_player)
+				else:
+					LOGGER.info("Draw: Both proceed")
+					next_players.extend(round_players)
+			if len(players) % 2 == 1:
+				# last player gets a bye
+				LOGGER.info("Giving a bye to: %s", players[-1])
+				next_players.append(players[-1])
+			if players == next_players:
+				LOGGER.info("Draw in final round!")
+				break
+			players = next_players
 
 	def run_pairing(self, player_names):
 		try:
@@ -221,6 +245,7 @@ class Engine:
 
 			for player in players:
 				player.expect(pexpect.EOF)
+				player.kill(0)
 
 			scores = game.final_scores()
 
