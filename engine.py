@@ -6,6 +6,8 @@ import subprocess
 
 import pexpect
 
+from db import setupdb, save_result
+
 LOGGER = logging.getLogger(__name__)
 
 BOTS = {
@@ -127,22 +129,6 @@ class GameGen2(BaseGame):
 	pass
 
 
-def setupdb():
-	conn = sqlite3.connect('hack.db')
-	cur = conn.cursor()
-	cur.execute('''create table if not exists results (
-		id integer primary key,
-		p1 text not null,
-		p1_score integer not null,
-		p2 text not null,
-		p2_score integer not null,
-		t timestamp default current_timestamp
-	)''')
-
-	conn.commit()
-	conn.close()
-
-
 def main():
 	bots = list(BOTS)
 	random.shuffle(bots)
@@ -150,8 +136,13 @@ def main():
 	p1_bot_name, p2_bot_name = bots[:2]
 	rounds = 50
 
-	p1 = pexpect.spawn('docker run -i -v %s/bots:/bots -w /bots python:3.8 python -u -m %s' % (os.getcwd(), p1_bot_name))
-	p2 = pexpect.spawn('docker run -i -v %s/bots:/bots -w /bots python:3.8 python -u -m %s' % (os.getcwd(), p2_bot_name))
+	# docker
+	# p1 = pexpect.spawn('docker run -i -v %s/bots:/bots -w /bots python:3.8 python -u -m %s' % (os.getcwd(), p1_bot_name))
+	# p2 = pexpect.spawn('docker run -i -v %s/bots:/bots -w /bots python:3.8 python -u -m %s' % (os.getcwd(), p2_bot_name))
+
+	# not docker
+	p1 = pexpect.spawn('python -u -m bots.%s' % (p1_bot_name, ))
+	p2 = pexpect.spawn('python -u -m bots.%s' % (p2_bot_name, ))
 
 	p1.sendline('0 %d' % (rounds, ))
 	p1.expect('ok')
@@ -185,17 +176,7 @@ def main():
 	p1_score, p2_score = game.final_scores()
 	LOGGER.info('p1_score=%r, p2_score=%r', p1_score, p2_score)
 
-	conn = sqlite3.connect('hack.db')
-	cur = conn.cursor()
-	cur.execute('insert into results (p1, p1_score, p2, p2_score) values (?, ?, ?, ?)', (
-		p1_bot_name,
-		p1_score,
-		p2_bot_name,
-		p2_score
-	))
-
-	conn.commit()
-	conn.close()
+	save_result(p1_bot_name, p1_score, p2_bot_name, p2_score)
 
 
 if __name__ == '__main__':

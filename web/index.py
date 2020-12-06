@@ -16,6 +16,10 @@ TEMPLATE = '''<html>
 	<body>
 		<h1>gamhack2020</h1>
 
+		<ul>
+			<li><a href="./rules.html">rules</a></li>
+		</ul>
+
 		<h2>recent results</h2>
 		<table>
 			<thead>
