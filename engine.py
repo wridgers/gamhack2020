@@ -128,6 +128,8 @@ class GameGen2(BaseGame):
 
 
 class Engine:
+	TIMEOUT = 100
+
 	game_class = GameGen0
 
 	def __init__(self, tournament_id):
@@ -183,7 +185,10 @@ class Engine:
 		assert len(player_names) == 2
 		LOGGER.info('p1: %s, p2: %s', *player_names)
 
-		players = [pexpect.spawn('python -u -m bots.%s' % (player_name,)) for player_name in player_names]
+		players = [
+			pexpect.spawn('python -u -m bots.%s' % (player_name,), timeout=self.TIMEOUT / 1e3)
+			for player_name in player_names
+		]
 
 		game = self.game_class(self.rounds)
 		for player in players:
