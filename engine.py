@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import random
+import re
 import sqlite3
 import subprocess
 
@@ -10,11 +11,6 @@ import pexpect
 from db import setupdb, save_result
 
 LOGGER = logging.getLogger(__name__)
-
-BOTS = {
-	'always_rock',
-	'random_play',
-}
 
 
 class GameException(Exception):
@@ -131,22 +127,19 @@ class GameGen2(BaseGame):
 
 
 class Engine:
-	def __init__(self, p1_bot_name, p2_bot_name):
-		self.p1_bot_name = p1_bot_name
-		self.p2_bot_name = p2_bot_name
+	game_class = GameGen0
+
+	def __init__(self):
+		self.players = []
 
 		self.rounds = 50
-		self.game = GameGen0(self.rounds)
 
-		self.p1 = pexpect.spawn('python -u -m bots.%s' % (p1_bot_name, ))
-		self.p2 = pexpect.spawn('python -u -m bots.%s' % (p2_bot_name, ))
-
-	def game_header(self):
+	def game_header(self, player_names):
 		return {
 			'gen': 0,
 			'rounds': self.rounds,
-			'p1': self.p1_bot_name,
-			'p2': self.p2_bot_name,
+			'p1': player_names[0],
+			'p2': player_names[1],
 		}
 
 	def round_header(self, rnd):
@@ -156,54 +149,77 @@ class Engine:
 
 	@staticmethod
 	def write_json(p, obj):
-		p.read(p.sendline(json.dumps(obj)))
+		data = json.dumps(obj)
+		LOGGER.info("Wrote: %s", data)
+		got = p.read(p.sendline(data))
+		LOGGER.info("Got: %s", got)
 
 	@staticmethod
 	def read_json(p):
 		'''
 		TODO: timeout + failure
 		'''
-		return json.loads(p.readline())
+		data = p.readline()
+		LOGGER.info("Data read: %s", data)
+		return json.loads(data)
+
+	def add_players(self):
+		module_re = re.compile('^[a-z_]+$')
+		with os.scandir('bots') as it:
+			for entry in it:
+				if not entry.is_dir() or not module_re.match(entry.name):
+					LOGGER.info("skipping %s", entry.name)
+					continue
+				LOGGER.info("adding %s", entry.name)
+				self.players.append(entry.name)
 
 	def run(self):
-		LOGGER.info('p1: %s, p2: %s', self.p1_bot_name, self.p2_bot_name)
+		self.add_players()
+		self.run_pairing(random.sample(self.players, 2))
 
-		self.write_json(self.p1, self.game_header())
-		self.write_json(self.p2, self.game_header())
+	def run_pairing(self, player_names):
+		assert len(player_names) == 2
+		LOGGER.info('p1: %s, p2: %s', *player_names)
 
-		assert self.read_json(self.p1)['ready']
-		LOGGER.info('p1 ready')
+		players = [pexpect.spawn('python -u -m bots.%s' % (player_name,)) for player_name in player_names]
 
-		assert self.read_json(self.p2)['ready']
-		LOGGER.info('p2 ready')
+		game = self.game_class(self.rounds)
+		for player in players:
+			self.write_json(player, self.game_header(player_names))
+
+		for idx, player in enumerate(players):
+			assert self.read_json(player)['ready']
+			LOGGER.info('p%s ready', idx + 1)
 
 		for i in range(self.rounds):
-			self.write_json(self.p1, self.round_header(i + 1))
-			self.write_json(self.p2, self.round_header(i + 1))
+			for player in players:
+				self.write_json(player, self.round_header(i + 1))
 
-			p1_move = self.read_json(self.p1)['hand'][0]
-			p2_move = self.read_json(self.p2)['hand'][0]
+			moves = []
+			for player in players:
+				moves.append(self.read_json(player)['hand'][0])
 
-			LOGGER.info('p1_move=%r, p2_move=%r', p1_move, p2_move)
+			LOGGER.info('p1_move=%r, p2_move=%r', *moves)
 
-			self.game.apply(p1_move, p2_move)
+			game.apply(*moves)
 
-		self.p1.expect(pexpect.EOF)
-		self.p2.expect(pexpect.EOF)
+		for player in players:
+			player.expect(pexpect.EOF)
 
-		p1_score, p2_score = self.game.final_scores()
-		LOGGER.info('p1_score=%r, p2_score=%r', p1_score, p2_score)
+		scores = game.final_scores()
+		LOGGER.info('p1_score=%r, p2_score=%r', *scores)
 
-		save_result(self.p1_bot_name, p1_score, self.p2_bot_name, p2_score)
+		save_result(player_names[0], scores[0], player_names[1], scores[1])
+
+		if scores[0] > scores[1]:
+			return 1
+		if scores[1] > scores[0]:
+			return 2
+		return 0
 
 
 def main():
-	bots = list(BOTS)
-	random.shuffle(bots)
-
-	p1_bot_name, p2_bot_name = bots[:2]
-
-	engine = Engine(p1_bot_name, p2_bot_name)
+	engine = Engine()
 	engine.run()
 
 
