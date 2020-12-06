@@ -130,63 +130,81 @@ class GameGen2(BaseGame):
 	pass
 
 
+class Engine:
+	def __init__(self, p1_bot_name, p2_bot_name):
+		self.p1_bot_name = p1_bot_name
+		self.p2_bot_name = p2_bot_name
+
+		self.rounds = 50
+		self.game = GameGen0(self.rounds)
+
+		self.p1 = pexpect.spawn('python -u -m bots.%s' % (p1_bot_name, ))
+		self.p2 = pexpect.spawn('python -u -m bots.%s' % (p2_bot_name, ))
+
+	def game_header(self):
+		return {
+			'gen': 0,
+			'rounds': self.rounds,
+			'p1': self.p1_bot_name,
+			'p2': self.p2_bot_name,
+		}
+
+	def round_header(self, rnd):
+		return {
+			'round': rnd,
+		}
+
+	@staticmethod
+	def write_json(p, obj):
+		p.read(p.sendline(json.dumps(obj)))
+
+	@staticmethod
+	def read_json(p):
+		'''
+		TODO: timeout + failure
+		'''
+		return json.loads(p.readline())
+
+	def run(self):
+		LOGGER.info('p1: %s, p2: %s', self.p1_bot_name, self.p2_bot_name)
+
+		self.write_json(self.p1, self.game_header())
+		self.write_json(self.p2, self.game_header())
+
+		assert self.read_json(self.p1)['ready']
+		LOGGER.info('p1 ready')
+
+		assert self.read_json(self.p2)['ready']
+		LOGGER.info('p2 ready')
+
+		for i in range(self.rounds):
+			self.write_json(self.p1, self.round_header(i + 1))
+			self.write_json(self.p2, self.round_header(i + 1))
+
+			p1_move = self.read_json(self.p1)['hand'][0]
+			p2_move = self.read_json(self.p2)['hand'][0]
+
+			LOGGER.info('p1_move=%r, p2_move=%r', p1_move, p2_move)
+
+			self.game.apply(p1_move, p2_move)
+
+		self.p1.expect(pexpect.EOF)
+		self.p2.expect(pexpect.EOF)
+
+		p1_score, p2_score = self.game.final_scores()
+		LOGGER.info('p1_score=%r, p2_score=%r', p1_score, p2_score)
+
+		save_result(self.p1_bot_name, p1_score, self.p2_bot_name, p2_score)
+
+
 def main():
 	bots = list(BOTS)
 	random.shuffle(bots)
 
 	p1_bot_name, p2_bot_name = bots[:2]
-	rounds = 50
 
-	# docker
-	# p1 = pexpect.spawn('docker run -i -v %s/bots:/bots -w /bots python:3.8 python -u -m %s' % (os.getcwd(), p1_bot_name))
-	# p2 = pexpect.spawn('docker run -i -v %s/bots:/bots -w /bots python:3.8 python -u -m %s' % (os.getcwd(), p2_bot_name))
-
-	# not docker
-	p1 = pexpect.spawn('python -u -m bots.%s' % (p1_bot_name, ))
-	p2 = pexpect.spawn('python -u -m bots.%s' % (p2_bot_name, ))
-
-	LOGGER.info('p1: %s, p2: %s', p1_bot_name, p2_bot_name)
-
-	header = json.dumps({
-		'gen': 0,
-		'rounds': rounds,
-		'p1': p1_bot_name,
-		'p2': p2_bot_name,
-	})
-
-	p1.read(p1.sendline(header))
-
-	assert json.loads(p1.readline())['ready']
-	LOGGER.info('p1 ready')
-
-	p2.read(p2.sendline(header))
-
-	assert json.loads(p2.readline())['ready']
-	LOGGER.info('p2 ready')
-
-	game = GameGen0(rounds)
-
-	for i in range(rounds):
-		round_header = json.dumps({
-			'round': i + 1,
-		})
-
-		p1.read(p1.sendline(round_header))
-		p2.read(p2.sendline(round_header))
-
-		p1_move = json.loads(p1.readline())['hand'][0]
-		p2_move = json.loads(p2.readline())['hand'][0]
-
-		LOGGER.info('p1_move=%r, p2_move=%r', p1_move, p2_move)
-		game.apply(p1_move, p2_move)
-
-	p1.expect(pexpect.EOF)
-	p2.expect(pexpect.EOF)
-
-	p1_score, p2_score = game.final_scores()
-	LOGGER.info('p1_score=%r, p2_score=%r', p1_score, p2_score)
-
-	save_result(p1_bot_name, p1_score, p2_bot_name, p2_score)
+	engine = Engine(p1_bot_name, p2_bot_name)
+	engine.run()
 
 
 if __name__ == '__main__':
