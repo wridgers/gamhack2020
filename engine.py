@@ -5,6 +5,7 @@ import random
 import re
 import sqlite3
 import subprocess
+import sys
 
 import pexpect
 
@@ -129,7 +130,8 @@ class GameGen2(BaseGame):
 class Engine:
 	game_class = GameGen0
 
-	def __init__(self):
+	def __init__(self, tournament_id):
+		self.tournament_id = tournament_id
 		self.players = []
 
 		self.rounds = 50
@@ -164,7 +166,7 @@ class Engine:
 		return json.loads(data)
 
 	def add_players(self):
-		module_re = re.compile('^[a-z_]+$')
+		module_re = re.compile('^[a-z][a-z_]+$')
 		with os.scandir('bots') as it:
 			for entry in it:
 				if not entry.is_dir() or not module_re.match(entry.name):
@@ -209,7 +211,7 @@ class Engine:
 		scores = game.final_scores()
 		LOGGER.info('p1_score=%r, p2_score=%r', *scores)
 
-		save_result(player_names[0], scores[0], player_names[1], scores[1])
+		save_result(self.tournament_id, 0, player_names[0], scores[0], player_names[1], scores[1])
 
 		if scores[0] > scores[1]:
 			return 1
@@ -219,7 +221,8 @@ class Engine:
 
 
 def main():
-	engine = Engine()
+	tournament_id = sys.argv[1]
+	engine = Engine(tournament_id)
 	engine.run()
 
 

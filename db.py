@@ -8,6 +8,8 @@ def setupdb():
 	cur = conn.cursor()
 	cur.execute('''create table if not exists results (
 		id integer primary key,
+		tournament_id text not null,
+		gen integer not null,
 		p1 text not null,
 		p1_score integer not null,
 		p2 text not null,
@@ -19,10 +21,15 @@ def setupdb():
 	conn.close()
 
 
-def save_result(p1_bot_name, p1_score, p2_bot_name, p2_score):
+def save_result(tournament_id, gen, p1_bot_name, p1_score, p2_bot_name, p2_score):
 	conn = sqlite3.connect(DB_FILE)
 	cur = conn.cursor()
-	cur.execute('insert into results (p1, p1_score, p2, p2_score) values (?, ?, ?, ?)', (
+	cur.execute('''
+	insert into results
+	(tournament_id, gen, p1, p1_score, p2, p2_score)
+	values (?, ?, ?, ?, ?, ?)''', (
+		tournament_id,
+		gen,
 		p1_bot_name,
 		p1_score,
 		p2_bot_name,
@@ -31,14 +38,3 @@ def save_result(p1_bot_name, p1_score, p2_bot_name, p2_score):
 
 	conn.commit()
 	conn.close()
-
-def get_results():
-	conn = sqlite3.connect(DB_FILE)
-	cur = conn.cursor()
-	cur.execute('select * from results order by t desc limit 20')
-	results = cur.fetchall()
-
-	conn.commit()
-	conn.close()
-
-	return results

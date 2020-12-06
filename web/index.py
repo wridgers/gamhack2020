@@ -25,11 +25,13 @@ TEMPLATE = '''<html>
 			<thead>
 				<tr>
 					<td>id</td>
+					<td>gen</td>
 					<td>p1</td>
 					<td>p1 score</td>
 					<td>p2</td>
 					<td>p2 score</td>
 					<td>when</td>
+					<td>tournament id</td>
 				</tr>
 			</thead>
 
@@ -37,11 +39,13 @@ TEMPLATE = '''<html>
 				{% for result in results %}
 					<tr>
 						<td>{{ result[0] }}</td>
-						<td>{{ result[1] }}</td>
 						<td>{{ result[2] }}</td>
 						<td>{{ result[3] }}</td>
 						<td>{{ result[4] }}</td>
 						<td>{{ result[5] }}</td>
+						<td>{{ result[6] }}</td>
+						<td>{{ result[7] }}</td>
+						<td><a href="logs/{{ result[1] }}.txt">logs</a></td>
 					</tr>
 				{% endfor %}
 			</tbody>
