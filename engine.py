@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import random
@@ -144,28 +145,37 @@ def main():
 	p1 = pexpect.spawn('python -u -m bots.%s' % (p1_bot_name, ))
 	p2 = pexpect.spawn('python -u -m bots.%s' % (p2_bot_name, ))
 
-	p1.sendline('0 %d' % (rounds, ))
-	p1.expect('ok')
+	LOGGER.info('p1: %s, p2: %s', p1_bot_name, p2_bot_name)
 
+	header = json.dumps({
+		'gen': 0,
+		'rounds': rounds,
+		'p1': p1_bot_name,
+		'p2': p2_bot_name,
+	})
+
+	p1.read(p1.sendline(header))
+
+	assert json.loads(p1.readline())['ready']
 	LOGGER.info('p1 ready')
 
-	p2.sendline('0 %d' % (rounds, ))
-	p2.expect('ok')
+	p2.read(p2.sendline(header))
 
+	assert json.loads(p2.readline())['ready']
 	LOGGER.info('p2 ready')
 
 	game = GameGen0(rounds)
 
 	for i in range(rounds):
-		p1.sendline('round %d' % (i + 1))
-		p2.sendline('round %d' % (i + 1))
+		round_header = json.dumps({
+			'round': i + 1,
+		})
 
-		moves = ['R', 'P', 'S']
-		p1_index = p1.expect(moves)
-		p2_index = p2.expect(moves)
+		p1.read(p1.sendline(round_header))
+		p2.read(p2.sendline(round_header))
 
-		p1_move = moves[p1_index]
-		p2_move = moves[p2_index]
+		p1_move = json.loads(p1.readline())['hand'][0]
+		p2_move = json.loads(p2.readline())['hand'][0]
 
 		LOGGER.info('p1_move=%r, p2_move=%r', p1_move, p2_move)
 		game.apply(p1_move, p2_move)

@@ -1,17 +1,23 @@
+import json
 import random
 import sys
 
 def main():
-	header = sys.stdin.readline().split(' ')
+	header = json.loads(sys.stdin.readline())
 
-	version = int(header[0])
-	rounds = int(header[1])
+	version = header['gen']
+	rounds = header['rounds']
 
-	print('ok')
+	print(json.dumps({
+		'ready': True,
+	}))
 
 	for _ in range(rounds):
-		_line = sys.stdin.readline()
-		print(random.choice(['R', 'P', 'S']))
+		round_header = json.loads(sys.stdin.readline())
+
+		print(json.dumps({
+			'hand': [random.choice(['R', 'P', 'S']), ],
+		}))
 
 
 if __name__ == '__main__':
