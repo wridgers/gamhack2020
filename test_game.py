@@ -1,6 +1,6 @@
 import pytest
 
-from engine import BaseGame, GameGen0, GameGen1, GameGen2, GameException
+from game import BaseGame, GameGen0, GameGen1, GameGen2, GameException
 
 
 def test_base_game_none():
