@@ -23,6 +23,8 @@ class BaseGame():
 		('S', 'P'): (1, -1),
 	}
 
+	GEN = -1
+
 	# How many points you lose if you play an invalid hand
 	BAD_PLAY_COST = -1
 
@@ -88,6 +90,8 @@ class GameGen0(BaseGame):
 	Most basic variant. Each player is free to play each card as much as they want.
 	'''
 
+	GEN = 0
+
 	def __init__(self, players, rounds):
 		decks = [
 			list(self.CARDS) * rounds,
@@ -98,7 +102,7 @@ class GameGen0(BaseGame):
 
 	def game_header(self):
 		return {
-			'gen': 0,
+			'gen': self.GEN,
 			'rounds': self.total_rounds,
 			'players': self.players,
 		}
@@ -115,6 +119,8 @@ class GameGen1(BaseGame):
 	Slightly more complex, each deck has exactly as many cards in their deck as rounds in the game and equal quantities
 	of each card type.
 	'''
+
+	GEN = 1
 
 	def __init__(self, players, rounds):
 		if rounds % len(self.CARDS) != 0:
@@ -135,4 +141,5 @@ class GameGen2(BaseGame):
 
 	It's encouraged that the number of rounds is prime.
 	'''
-	pass
+
+	GEN = 2

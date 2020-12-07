@@ -126,6 +126,7 @@ class Engine:
 
 		try:
 			game = self.game_class(player_names, self.rounds)
+
 			for player in players:
 				player.send(game.game_header())
 
