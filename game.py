@@ -31,10 +31,12 @@ class BaseGame():
 
 	CARDS = {'R', 'P', 'S'}
 
-	def __init__(self, rounds, p1_deck, p2_deck):
+	def __init__(self, players, rounds, p1_deck, p2_deck):
 		self.p1_deck = p1_deck
 		self.p2_deck = p2_deck
 
+		assert len(players) == 2
+		self.players = players
 		self.scores = [0, 0]
 
 		self.current_round = 1
@@ -80,10 +82,10 @@ class GameGen0(BaseGame):
 	Most basic variant. Each player is free to play each card as much as they want.
 	'''
 
-	def __init__(self, rounds):
+	def __init__(self, players, rounds):
 		p1_deck = list(self.CARDS) * rounds
 		p2_deck = list(self.CARDS) * rounds
-		super().__init__(rounds, p1_deck, p2_deck)
+		super().__init__(players, rounds, p1_deck, p2_deck)
 
 
 class GameGen1(BaseGame):
@@ -92,7 +94,7 @@ class GameGen1(BaseGame):
 	of each card type.
 	'''
 
-	def __init__(self, rounds):
+	def __init__(self, players, rounds):
 		if rounds % len(self.CARDS) != 0:
 			# otherwise we can't have equal amounts of cards
 			raise GameException('rounds mod len(cards) should be zero')
@@ -100,7 +102,7 @@ class GameGen1(BaseGame):
 		p1_deck = list(self.CARDS) * int(rounds / len(self.CARDS))
 		p2_deck = list(self.CARDS) * int(rounds / len(self.CARDS))
 
-		super().__init__(rounds, p1_deck, p2_deck)
+		super().__init__(players, rounds, p1_deck, p2_deck)
 
 
 class GameGen2(BaseGame):

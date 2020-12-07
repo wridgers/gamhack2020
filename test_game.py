@@ -4,7 +4,7 @@ from game import BaseGame, GameGen0, GameGen1, GameGen2, GameException
 
 
 def test_base_game_none():
-	game = BaseGame(3, ['R'] * 3, ['S'] * 3)
+	game = BaseGame(['p1', 'p2'], 3, ['R'] * 3, ['S'] * 3)
 
 	# None means bot didn't provide a hand in time
 	game.apply(None, 'S')
@@ -17,7 +17,7 @@ def test_base_game_none():
 
 
 def test_gen0_game():
-	game = GameGen0(3)
+	game = GameGen0(['p1', 'p2'], 3)
 
 	# valid move nets p2 a point
 	game.apply('R', 'P')
@@ -48,9 +48,9 @@ def test_gen0_game():
 
 def test_gen1_game():
 	with pytest.raises(GameException):
-		game = GameGen1(17)
+		game = GameGen1(['p1', 'p2'], 17)
 
-	game = GameGen1(3)
+	game = GameGen1(['p1', 'p2'], 3)
 
 	assert(set(game.p1_deck) == {'R', 'P', 'S'})
 	assert(set(game.p2_deck) == {'R', 'P', 'S'})
@@ -64,7 +64,7 @@ def test_gen1_game():
 	assert(p2_score == 3)
 
 def test_gen1_game_invalid_move():
-	game = GameGen1(3)
+	game = GameGen1(['p1', 'p2'], 3)
 
 	# p2 plays P twice, oops
 	game.apply('R', 'P') # p2 win
@@ -76,7 +76,7 @@ def test_gen1_game_invalid_move():
 	assert(p2_score == + 1 + game.BAD_PLAY_COST + 1)
 
 def test_gen2_game():
-	game = GameGen2(3, ['R', 'R', 'R'], ['S', 'S', 'S'])
+	game = GameGen2(['p1', 'p2'], 3, ['R', 'R', 'R'], ['S', 'S', 'S'])
 
 	game.apply('R', 'S')
 	game.apply('P', 'S') # p1 can't play P

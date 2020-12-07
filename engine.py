@@ -138,7 +138,7 @@ class Engine:
 			players.append(player)
 
 		try:
-			game = self.game_class(self.rounds)
+			game = self.game_class(players, self.rounds)
 			for player in players:
 				player.send(self.game_header(player_names))
 
