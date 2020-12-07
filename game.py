@@ -45,7 +45,7 @@ class BaseGame():
 	def game_header(self):
 		raise NotImplemented
 
-	def round_header(self):
+	def round_header(self, player_idx):
 		raise NotImplemented
 
 	def apply(self, p1_card, p2_card):
@@ -103,9 +103,10 @@ class GameGen0(BaseGame):
 			'players': self.players,
 		}
 
-	def round_header(self):
+	def round_header(self, player_idx):
 		return {
 			'round': self.current_round,
+			'deck': self.decks[player_idx],
 		}
 
 

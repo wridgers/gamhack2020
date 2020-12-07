@@ -25,8 +25,9 @@ def test_gen0_game():
 	assert game_header['rounds'] == 3
 	assert game_header['players'] == ['p1', 'p2']
 
-	round_header = game.round_header()
+	round_header = game.round_header(0) # p1 header
 	assert round_header['round'] == 1
+	assert len(round_header['deck']) == 9
 
 	# valid move nets p2 a point
 	game.apply('R', 'P')
@@ -34,8 +35,9 @@ def test_gen0_game():
 	assert(game.scores[0] == -1)
 	assert(game.scores[1] == 1)
 
-	round_header = game.round_header()
+	round_header = game.round_header(1) # p2 header
 	assert round_header['round'] == 2
+	assert len(round_header['deck']) == 8
 
 	# invalid move from p2 nets p1 a point, and punishes p2
 	game.apply('R', '?')
@@ -46,8 +48,9 @@ def test_gen0_game():
 	with pytest.raises(GameException):
 		game.final_scores()
 
-	round_header = game.round_header()
+	round_header = game.round_header(0) # p1 header
 	assert round_header['round'] == 3
+	assert len(round_header['deck']) == 7
 
 	# draw
 	game.apply('S', 'S')
