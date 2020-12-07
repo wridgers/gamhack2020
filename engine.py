@@ -59,8 +59,6 @@ class PlayerThread(threading.Thread):
 		return "%s(%s, %s)" % (self.__class__.__name__, self.player_num, self.player_module)
 
 class Engine:
-	TIMEOUT = 100
-
 	FOUL_COST = -100
 	FOUL_WIN = 1
 
