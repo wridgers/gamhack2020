@@ -42,6 +42,12 @@ class BaseGame():
 		self.current_round = 1
 		self.total_rounds = rounds
 
+	def game_header(self):
+		raise NotImplemented
+
+	def round_header(self):
+		raise NotImplemented
+
 	def apply(self, p1_card, p2_card):
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
@@ -86,6 +92,18 @@ class GameGen0(BaseGame):
 		p1_deck = list(self.CARDS) * rounds
 		p2_deck = list(self.CARDS) * rounds
 		super().__init__(players, rounds, p1_deck, p2_deck)
+
+	def game_header(self):
+		return {
+			'gen': 0,
+			'rounds': self.total_rounds,
+			'players': self.players,
+		}
+
+	def round_header(self):
+		return {
+			'round': self.current_round,
+		}
 
 
 class GameGen1(BaseGame):

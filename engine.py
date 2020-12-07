@@ -70,19 +70,6 @@ class Engine:
 
 		self.rounds = 5
 
-	def game_header(self, player_names):
-		return {
-			'gen': 0,
-			'rounds': self.rounds,
-			'p1': player_names[0],
-			'p2': player_names[1],
-		}
-
-	def round_header(self, rnd):
-		return {
-			'round': rnd,
-		}
-
 	def get_players(self):
 		module_re = re.compile('^[a-z0-9][a-z0-9_]+$')
 		with os.scandir('bots') as it:
@@ -140,7 +127,7 @@ class Engine:
 		try:
 			game = self.game_class(players, self.rounds)
 			for player in players:
-				player.send(self.game_header(player_names))
+				player.send(game.game_header())
 
 			for idx, player in enumerate(players):
 				assert player.receive()['ready']
@@ -148,7 +135,7 @@ class Engine:
 
 			for i in range(self.rounds):
 				for player in players:
-					player.send(self.round_header(i + 1))
+					player.send(game.round_header())
 
 				moves = []
 				for player in players:
