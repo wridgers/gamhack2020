@@ -35,8 +35,7 @@ class BaseGame():
 		self.p1_deck = p1_deck
 		self.p2_deck = p2_deck
 
-		self.p1_score = 0
-		self.p2_score = 0
+		self.scores = [0, 0]
 
 		self.current_round = 1
 		self.total_rounds = rounds
@@ -49,21 +48,21 @@ class BaseGame():
 			self.p1_deck.remove(p1_card)
 			self.p2_deck.remove(p2_card)
 
-			p1_payoff, p2_payoff = self.PAYOFF_TABLE[p1_card, p2_card]
+			payoffs = self.PAYOFF_TABLE[p1_card, p2_card]
 
-			self.p1_score += p1_payoff
-			self.p2_score += p2_payoff
+			self.scores[0] += payoffs[0]
+			self.scores[1] += payoffs[1]
 
 		else:
 			if p1_card not in self.p1_deck:
-				self.p1_score += self.BAD_PLAY_COST
-				self.p2_score += self.BAD_PLAY_REWARD
+				self.scores[0] += self.BAD_PLAY_COST
+				self.scores[1] += self.BAD_PLAY_REWARD
 			else:
 				self.p1_deck.remove(p1_card)
 
 			if p2_card not in self.p2_deck:
-				self.p1_score += self.BAD_PLAY_REWARD
-				self.p2_score += self.BAD_PLAY_COST
+				self.scores[0] += self.BAD_PLAY_REWARD
+				self.scores[1] += self.BAD_PLAY_COST
 			else:
 				self.p2_deck.remove(p2_card)
 
@@ -73,10 +72,7 @@ class BaseGame():
 		if self.current_round <= self.total_rounds:
 			raise GameException('game is not over')
 
-		return (
-			self.p1_score,
-			self.p2_score,
-		)
+		return self.scores
 
 
 class GameGen0(BaseGame):

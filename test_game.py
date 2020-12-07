@@ -21,13 +21,13 @@ def test_gen0_game():
 
 	# valid move nets p2 a point
 	game.apply('R', 'P')
-	assert(game.p1_score == -1)
-	assert(game.p2_score == 1)
+	assert(game.scores[0] == -1)
+	assert(game.scores[1] == 1)
 
 	# invalid move from p2 nets p1 a point, and punishes p2
 	game.apply('R', '?')
-	assert(game.p1_score == 0)
-	assert(game.p2_score == 0)
+	assert(game.scores[0] == 0)
+	assert(game.scores[1] == 0)
 
 	# game is not over, raise
 	with pytest.raises(GameException):
@@ -35,8 +35,8 @@ def test_gen0_game():
 
 	# draw
 	game.apply('S', 'S')
-	assert(game.p1_score == 0)
-	assert(game.p2_score == 0)
+	assert(game.scores[0] == 0)
+	assert(game.scores[1] == 0)
 
 	# game is over, raise
 	with pytest.raises(GameException):
