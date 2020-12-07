@@ -20,3 +20,5 @@ class Player(base.Player):
 			self.send({
 				'hand': [random.choice(['R', 'P', 'S'])],
 			})
+
+			_response = self.receive()

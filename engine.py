@@ -144,7 +144,10 @@ class Engine:
 
 				LOGGER.info('p1_move=%r, p2_move=%r', *moves)
 
-				game.apply(*moves)
+				responses = game.apply(*moves)
+
+				for idx, response in enumerate(responses):
+					players[idx].send(response)
 
 			for idx, player in enumerate(players):
 				player.join()
@@ -152,11 +155,11 @@ class Engine:
 			scores = game.final_scores()
 
 		except P1FoulException:
-			LOGGER.info('p1 fouled. bad p1')
+			LOGGER.exception('p1 fouled. bad p1')
 			scores = [self.FOUL_COST, self.FOUL_WIN]
 
 		except P2FoulException:
-			LOGGER.info('p2 fouled. bad p2')
+			LOGGER.exception('p2 fouled. bad p2')
 			scores = [self.FOUL_WIN, self.FOUL_COST]
 
 		LOGGER.info('p1_score=%r, p2_score=%r', *scores)

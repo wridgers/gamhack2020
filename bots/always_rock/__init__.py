@@ -20,3 +20,5 @@ class Player(base.Player):
 			self.send({
 				'hand': ['R'],
 			})
+
+			_response = self.receive()

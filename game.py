@@ -88,6 +88,11 @@ class BaseGame():
 
 		self.current_round += 1
 
+		return [
+			{'opponent_hand': p2_card, },
+			{'opponent_hand': p1_card, },
+		]
+
 	def final_scores(self):
 		if self.current_round <= self.total_rounds:
 			raise GameException('game is not over')
