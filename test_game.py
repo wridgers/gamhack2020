@@ -19,10 +19,23 @@ def test_base_game_none():
 def test_gen0_game():
 	game = GameGen0(['p1', 'p2'], 3)
 
+	game_header = game.game_header()
+
+	assert game_header['gen'] == 0
+	assert game_header['rounds'] == 3
+	assert game_header['players'] == ['p1', 'p2']
+
+	round_header = game.round_header()
+	assert round_header['round'] == 1
+
 	# valid move nets p2 a point
 	game.apply('R', 'P')
+
 	assert(game.scores[0] == -1)
 	assert(game.scores[1] == 1)
+
+	round_header = game.round_header()
+	assert round_header['round'] == 2
 
 	# invalid move from p2 nets p1 a point, and punishes p2
 	game.apply('R', '?')
@@ -32,6 +45,9 @@ def test_gen0_game():
 	# game is not over, raise
 	with pytest.raises(GameException):
 		game.final_scores()
+
+	round_header = game.round_header()
+	assert round_header['round'] == 3
 
 	# draw
 	game.apply('S', 'S')
@@ -45,6 +61,7 @@ def test_gen0_game():
 	p1_score, p2_score = game.final_scores()
 	assert(p1_score == 0)
 	assert(p2_score == 0)
+
 
 def test_gen1_game():
 	with pytest.raises(GameException):
@@ -63,6 +80,7 @@ def test_gen1_game():
 	assert(p1_score == -3)
 	assert(p2_score == 3)
 
+
 def test_gen1_game_invalid_move():
 	game = GameGen1(['p1', 'p2'], 3)
 
@@ -74,6 +92,7 @@ def test_gen1_game_invalid_move():
 	p1_score, p2_score = game.final_scores()
 	assert(p1_score == - 1 + game.BAD_PLAY_REWARD - 1)
 	assert(p2_score == + 1 + game.BAD_PLAY_COST + 1)
+
 
 def test_gen2_game():
 	game = GameGen2(['p1', 'p2'], 3, [['R', 'R', 'R'], ['S', 'S', 'S']])
