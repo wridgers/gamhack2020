@@ -4,7 +4,7 @@ from game import BaseGame, GameGen0, GameGen1, GameGen2, GameException
 
 
 def test_base_game_none():
-	game = BaseGame(['p1', 'p2'], 3, ['R'] * 3, ['S'] * 3)
+	game = BaseGame(['p1', 'p2'], 3, [['R'] * 3, ['S'] * 3])
 
 	# None means bot didn't provide a hand in time
 	game.apply(None, 'S')
@@ -52,8 +52,8 @@ def test_gen1_game():
 
 	game = GameGen1(['p1', 'p2'], 3)
 
-	assert(set(game.p1_deck) == {'R', 'P', 'S'})
-	assert(set(game.p2_deck) == {'R', 'P', 'S'})
+	assert(set(game.decks[0]) == {'R', 'P', 'S'})
+	assert(set(game.decks[1]) == {'R', 'P', 'S'})
 
 	game.apply('R', 'P') # p2 win
 	game.apply('S', 'R') # p2 win
@@ -76,7 +76,7 @@ def test_gen1_game_invalid_move():
 	assert(p2_score == + 1 + game.BAD_PLAY_COST + 1)
 
 def test_gen2_game():
-	game = GameGen2(['p1', 'p2'], 3, ['R', 'R', 'R'], ['S', 'S', 'S'])
+	game = GameGen2(['p1', 'p2'], 3, [['R', 'R', 'R'], ['S', 'S', 'S']])
 
 	game.apply('R', 'S')
 	game.apply('P', 'S') # p1 can't play P
@@ -87,5 +87,5 @@ def test_gen2_game():
 	assert(p2_score == -1 -1 + game.BAD_PLAY_REWARD)
 
 	# p1 has an R left, but p2 has an empty deck
-	assert(game.p1_deck == ['R'])
-	assert(not game.p2_deck)
+	assert(game.decks[0] == ['R'])
+	assert(not game.decks[1])

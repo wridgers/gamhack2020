@@ -31,12 +31,12 @@ class BaseGame():
 
 	CARDS = {'R', 'P', 'S'}
 
-	def __init__(self, players, rounds, p1_deck, p2_deck):
-		self.p1_deck = p1_deck
-		self.p2_deck = p2_deck
-
+	def __init__(self, players, rounds, decks):
 		assert len(players) == 2
+		assert len(decks) == 2
+
 		self.players = players
+		self.decks = decks
 		self.scores = [0, 0]
 
 		self.current_round = 1
@@ -52,9 +52,9 @@ class BaseGame():
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
 
-		if p1_card in self.p1_deck and p2_card in self.p2_deck:
-			self.p1_deck.remove(p1_card)
-			self.p2_deck.remove(p2_card)
+		if p1_card in self.decks[0] and p2_card in self.decks[1]:
+			self.decks[0].remove(p1_card)
+			self.decks[1].remove(p2_card)
 
 			payoffs = self.PAYOFF_TABLE[p1_card, p2_card]
 
@@ -62,17 +62,17 @@ class BaseGame():
 			self.scores[1] += payoffs[1]
 
 		else:
-			if p1_card not in self.p1_deck:
+			if p1_card not in self.decks[0]:
 				self.scores[0] += self.BAD_PLAY_COST
 				self.scores[1] += self.BAD_PLAY_REWARD
 			else:
-				self.p1_deck.remove(p1_card)
+				self.decks[0].remove(p1_card)
 
-			if p2_card not in self.p2_deck:
+			if p2_card not in self.decks[1]:
 				self.scores[0] += self.BAD_PLAY_REWARD
 				self.scores[1] += self.BAD_PLAY_COST
 			else:
-				self.p2_deck.remove(p2_card)
+				self.decks[1].remove(p2_card)
 
 		self.current_round += 1
 
@@ -89,9 +89,12 @@ class GameGen0(BaseGame):
 	'''
 
 	def __init__(self, players, rounds):
-		p1_deck = list(self.CARDS) * rounds
-		p2_deck = list(self.CARDS) * rounds
-		super().__init__(players, rounds, p1_deck, p2_deck)
+		decks = [
+			list(self.CARDS) * rounds,
+			list(self.CARDS) * rounds,
+		]
+
+		super().__init__(players, rounds, decks)
 
 	def game_header(self):
 		return {
@@ -117,10 +120,12 @@ class GameGen1(BaseGame):
 			# otherwise we can't have equal amounts of cards
 			raise GameException('rounds mod len(cards) should be zero')
 
-		p1_deck = list(self.CARDS) * int(rounds / len(self.CARDS))
-		p2_deck = list(self.CARDS) * int(rounds / len(self.CARDS))
+		decks = [
+			list(self.CARDS) * int(rounds / len(self.CARDS)),
+			list(self.CARDS) * int(rounds / len(self.CARDS)),
+		]
 
-		super().__init__(players, rounds, p1_deck, p2_deck)
+		super().__init__(players, rounds, decks)
 
 
 class GameGen2(BaseGame):
