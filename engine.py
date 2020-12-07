@@ -10,20 +10,13 @@ import sys
 import threading
 import queue
 
-from game import GameGen0
+from game import GameGen0, P1FoulException, P2FoulException
 from db import setupdb, save_result
 
 LOGGER = logging.getLogger(__name__)
 
-
-class P1FoulException(Exception):
-	pass
-
-
-class P2FoulException(Exception):
-	pass
-
 TIMEOUT = 0.1
+
 
 class PlayerThread(threading.Thread):
 	def __init__(self, player_num, player_module):
@@ -57,6 +50,7 @@ class PlayerThread(threading.Thread):
 
 	def __str__(self):
 		return "%s(%s, %s)" % (self.__class__.__name__, self.player_num, self.player_module)
+
 
 class Engine:
 	FOUL_COST = -100
@@ -170,6 +164,7 @@ class Engine:
 			return 1
 		if scores[1] > scores[0]:
 			return 2
+
 		return 0
 
 

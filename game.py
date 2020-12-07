@@ -7,6 +7,14 @@ class GameException(Exception):
 	pass
 
 
+class P1FoulException(GameException):
+	pass
+
+
+class P2FoulException(GameException):
+	pass
+
+
 class BaseGame():
 	PAYOFF_TABLE = {
 		('R', 'R'): (0, 0),
