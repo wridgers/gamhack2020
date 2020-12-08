@@ -64,8 +64,7 @@ class BaseGame():
 		if 'deck' in obj:
 			assert self.POOL, "no pool"
 			assert not self.decks[player_idx], "already has deck"
-
-			# TODO: check deck is subset of pool
+			assert all(x in self.POOL for x in obj['deck']), "invalid setup deck"
 			self.decks[player_idx] = obj['deck']
 
 		# TODO: hack...
