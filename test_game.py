@@ -10,7 +10,8 @@ from game import P1FoulException, P2FoulException, GameException
 	[(None, None), P1FoulException, [-1, 1]],
 ])
 def test_base_game_none(hands, exception, scores):
-	game = BaseGame(['p1', 'p2'], 3, [['R'] * 3, ['S'] * 3])
+	game = BaseGame(['p1', 'p2'], 3)
+	game.decks = [['R'] * 3, ['S'] * 3]
 
 	with pytest.raises(exception):
 		game.apply(hands)
@@ -117,7 +118,8 @@ def test_gen1_game_invalid_move():
 
 
 def test_gen2_game():
-	game = GameGen2(['p1', 'p2'], 3, [['R', 'R', 'R'], ['S', 'S', 'S']])
+	game = GameGen2(['p1', 'p2'], 3)
+	game.decks = [['R', 'R', 'R'], ['S', 'S', 'S']]
 
 	game_header = game.game_header()
 	assert game_header['gen'] == 2

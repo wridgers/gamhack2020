@@ -10,7 +10,7 @@ import sys
 import threading
 import queue
 
-from game import GameGen0, GameGen1
+from game import GameGen0, GameGen1, GameGen2
 from game import P1FoulException, P2FoulException
 from db import setupdb, save_result
 
@@ -39,13 +39,18 @@ class PlayerThread(threading.Thread):
 
 	def send(self, obj):
 		try:
+			LOGGER.debug('sending %r to %d', obj, self.player_num)
 			return self.player_in_queue.put(obj, timeout=TIMEOUT)
+
 		except queue.Full:
 			raise self.exception_class('timed out on write')
 
 	def receive(self):
 		try:
-			return self.player_out_queue.get(timeout=TIMEOUT)
+			obj = self.player_out_queue.get(timeout=TIMEOUT)
+			LOGGER.debug('recv. %r from %d', obj, self.player_num)
+			return obj
+
 		except queue.Empty:
 			raise self.exception_class('timed out on read')
 
@@ -54,7 +59,7 @@ class PlayerThread(threading.Thread):
 
 
 class Engine:
-	game_class = GameGen1
+	game_class = GameGen2
 
 	def __init__(self, tournament_id):
 		self.tournament_id = tournament_id
@@ -123,8 +128,8 @@ class Engine:
 				player.send(game.game_header())
 
 			for idx, player in enumerate(players):
-				assert player.receive()['ready']
-				LOGGER.info('p%s ready', idx + 1)
+				game.setup(idx, player.receive())
+				LOGGER.info('%s ready', player_names[idx])
 
 			for i in range(self.rounds):
 				for player, round_header in zip(players, game.round_headers()):

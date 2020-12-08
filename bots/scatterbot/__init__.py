@@ -10,9 +10,14 @@ class Player(base.Player):
 		_gen = header['gen']
 		rounds = header['rounds']
 
-		self.send({
+		setup = {
 			'ready': True,
-		})
+		}
+
+		if 'pool' in header:
+			setup['deck'] = random.sample(header['pool'], rounds)
+
+		self.send(setup)
 
 		for _ in range(rounds):
 			round_header = self.receive()

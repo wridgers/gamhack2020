@@ -33,26 +33,46 @@ class BaseGame():
 
 	GEN = -1
 
-	# TODO: check decks are legal (only contain CARDS)
-	CARDS = {'R', 'P', 'S'}
+	POOL = []
+	CARDS = set()
 
-	def __init__(self, players, rounds, decks):
+	def __init__(self, players, rounds):
 		assert len(players) == 2
-		assert len(decks) == 2
 
 		self.players = players
-		self.decks = decks
-		self.scores = [0, 0]
+		self.decks = [[]] * len(players)
+		self.scores = [0] * len(players)
 
 		self.current_round = 1
 		self.total_rounds = rounds
 
 	def game_header(self):
-		return {
+		header = {
 			'gen': self.GEN,
 			'rounds': self.total_rounds,
 			'players': self.players,
 		}
+
+		if self.POOL:
+			header['pool'] = self.POOL
+
+		return header
+
+	def setup(self, player_idx, obj):
+		assert obj['ready'], "not ready"
+
+		if 'deck' in obj:
+			assert self.POOL, "no pool"
+			assert not self.decks[player_idx], "already has deck"
+
+			# TODO: check deck is subset of pool
+			self.decks[player_idx] = obj['deck']
+
+		# TODO: hack...
+		if self.GEN == 0:
+			assert len(self.decks[player_idx]) == self.total_rounds * len(self.CARDS), "incorrect deck size"
+		else:
+			assert len(self.decks[player_idx]) == self.total_rounds, "incorrect deck size"
 
 	def round_headers(self):
 		if self.current_round > self.total_rounds:
@@ -71,7 +91,7 @@ class BaseGame():
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
 
-		# no sanity checking here, plus hax to make tests work
+		# TODO: no sanity checking here, plus hax to make tests work
 		p1_hand, p2_hand = hands
 		p1_card = p1_hand[0] if isinstance(p1_hand, list) else p1_hand
 		p2_card = p2_hand[0] if isinstance(p2_hand, list) else p2_hand
@@ -116,14 +136,14 @@ class GameGen0(BaseGame):
 	'''
 
 	GEN = 0
+	CARDS = {'R', 'P', 'S'}
 
 	def __init__(self, players, rounds):
-		decks = [
+		super().__init__(players, rounds)
+		self.decks = [
 			list(self.CARDS) * rounds,
 			list(self.CARDS) * rounds,
 		]
-
-		super().__init__(players, rounds, decks)
 
 
 class GameGen1(BaseGame):
@@ -133,33 +153,35 @@ class GameGen1(BaseGame):
 	'''
 
 	GEN = 1
+	CARDS = {'R', 'P', 'S'}
 
 	def __init__(self, players, rounds):
 		if rounds % len(self.CARDS) != 0:
 			# otherwise we can't have equal amounts of cards
 			raise GameException('rounds mod len(cards) should be zero')
 
-		decks = [
+		super().__init__(players, rounds)
+		self.decks = [
 			list(self.CARDS) * int(rounds / len(self.CARDS)),
 			list(self.CARDS) * int(rounds / len(self.CARDS)),
 		]
 
-		super().__init__(players, rounds, decks)
-
 
 class GameGen2(BaseGame):
 	'''
-	This time, players are free to decide the makeup of their deck.
+	This time, players are free to decide the makeup of their deck from an available pool.
 
 	It's encouraged that the number of rounds is prime.
 	'''
 
 	GEN = 2
+	POOL = ['R'] * 5 + ['P'] * 5 + ['S'] * 5
+	CARDS = {'R', 'P', 'S'}
 
 
 class GameGen3(BaseGame):
 	'''
-	Gen2 but with more cards, KILL and PEAK.
+	Gen2 but with more cards, KILL, PEAK, and STEAL.
 	'''
 
 	GEN = 3
