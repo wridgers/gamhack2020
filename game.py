@@ -33,12 +33,6 @@ class BaseGame():
 
 	GEN = -1
 
-	# How many points you lose if you play an invalid hand
-	BAD_PLAY_COST = -1
-
-	# How many points you gain if your opponent plays an invalid hand
-	BAD_PLAY_REWARD = 1
-
 	CARDS = {'R', 'P', 'S'}
 
 	def __init__(self, players, rounds, decks):
