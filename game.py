@@ -44,26 +44,6 @@ class BaseGame():
 
 		('S', 'R'): (0, 1),
 		('S', 'P'): (1, 0),
-
-		('C', 'R'): (1, 0),
-		('C', 'P'): (1, 0),
-		('C', 'S'): (1, 0),
-
-		('R', 'C'): (0, 1),
-		('P', 'C'): (0, 1),
-		('S', 'C'): (0, 1),
-
-		('L', 'L'): (0, 0),
-
-		('L', 'R'): (0, 1),
-		('L', 'P'): (0, 1),
-		('L', 'S'): (0, 1),
-		('L', 'C'): (0, 1),
-
-		('R', 'L'): (1, 0),
-		('P', 'L'): (1, 0),
-		('S', 'L'): (1, 0),
-		('C', 'L'): (1, 0),
 	}
 
 	GEN = -1
@@ -159,12 +139,24 @@ class BaseGame():
 				self.end_in_favour_of(1 - player_idx)
 				raise [P1FoulException, P2FoulException][player_idx]('invalid card: %s' % (card, ))
 
-		if cards == ('C', 'C'):
+		chickens = [x == 'C' for x in cards]
+		looks = [x == 'L' for x in cards]
+
+		if all(chickens):
 			self.end_in_favour_of(None)
 			raise EverybodyDiesException('both players played CHICKEN')
 
-		looks = [x == 'L' for x in cards]
-		payoffs = self.PAYOFF_TABLE[cards]
+		elif any(chickens):
+			payoffs = [1 if x else 0 for x in chickens]
+
+		elif all(looks):
+			payoffs = [0] * len(self.players)
+
+		elif any(looks):
+			payoffs = [0 if x else 1 for x in looks]
+
+		else:
+			payoffs = self.PAYOFF_TABLE[cards]
 
 		for player_idx, card in enumerate(cards):
 			self.decks[player_idx].remove(card)
