@@ -200,12 +200,12 @@ class Engine:
 
 		except P1FoulException:
 			LOGGER.exception('%s fouled' % (player_names[0], ))
-			game.end_in_favour_of(2)
+			game.end_in_favour_of(1)
 			outcome = 'foul'
 
 		except P2FoulException:
 			LOGGER.exception('%s fouled' % (player_names[1], ))
-			game.end_in_favour_of(1)
+			game.end_in_favour_of(0)
 			outcome = 'foul'
 
 		scores = game.final_scores()
