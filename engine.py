@@ -126,8 +126,8 @@ class Engine:
 				LOGGER.info('p%s ready', idx + 1)
 
 			for i in range(self.rounds):
-				for idx, player in enumerate(players):
-					player.send(game.round_header(idx))
+				for player, round_header in zip(players, game.round_headers()):
+					player.send(round_header)
 
 				hands = []
 				for player in players:

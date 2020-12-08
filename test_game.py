@@ -26,9 +26,9 @@ def test_gen0_game():
 	assert game_header['rounds'] == 3
 	assert game_header['players'] == ['p1', 'p2']
 
-	round_header = game.round_header(0) # p1 header
-	assert round_header['round'] == 1
-	assert len(round_header['deck']) == 9
+	p1_header, _p2_header = game.round_headers()
+	assert p1_header['round'] == 1
+	assert len(p1_header['deck']) == 9
 
 	# valid move nets p2 a point
 	game.apply(['R', 'P'])
@@ -36,9 +36,9 @@ def test_gen0_game():
 	assert(game.scores[0] == -1)
 	assert(game.scores[1] == 1)
 
-	round_header = game.round_header(1) # p2 header
-	assert round_header['round'] == 2
-	assert len(round_header['deck']) == 8
+	_p1_header, p2_header = game.round_headers()
+	assert p2_header['round'] == 2
+	assert len(p2_header['deck']) == 8
 
 	# game is not over, raise
 	with pytest.raises(GameException):
@@ -49,9 +49,9 @@ def test_gen0_game():
 	assert(game.scores[0] == -1)
 	assert(game.scores[1] == 1)
 
-	round_header = game.round_header(0) # p1 header
-	assert round_header['round'] == 3
-	assert len(round_header['deck']) == 7
+	p1_header, _p2_header = game.round_headers()
+	assert p1_header['round'] == 3
+	assert len(p1_header['deck']) == 7
 
 	# invalid move from p2 nets p1 a point, and punishes p2
 	with pytest.raises(P2FoulException):
@@ -84,23 +84,21 @@ def test_gen1_game():
 	game.apply(['R', 'P']) # p2 win
 	game.apply(['S', 'R']) # p2 win
 
-	round_header = game.round_header(0) # p1 header
-	assert round_header['round'] == 3
-	assert round_header['deck'] == ['P']
-
-	round_header = game.round_header(1) # p2 header
-	assert round_header['round'] == 3
-	assert round_header['deck'] == ['S']
+	p1_header, p2_header = game.round_headers()
+	assert p1_header['round'] == 3
+	assert p1_header['deck'] == ['P']
+	assert p2_header['round'] == 3
+	assert p2_header['deck'] == ['S']
 
 	game.apply(['P', 'S']) # p2 win
 
 	with pytest.raises(GameException):
-		# game is over, calling round_header is stupid
-		round_header = game.round_header(0)
+		# game is over, calling round_headers is stupid
+		game.round_headers()
 
 	with pytest.raises(GameException):
-		# game is over, calling round_header is stupid
-		round_header = game.round_header(1)
+		# game is over, calling round_headers is stupid
+		game.round_headers()
 
 	p1_score, p2_score = game.final_scores()
 	assert(p1_score == -3)
@@ -129,13 +127,11 @@ def test_gen2_game():
 	game.apply(['R', 'S'])
 	game.apply(['R', 'S'])
 
-	round_header = game.round_header(0) # p1 header
-	assert round_header['round'] == 3
-	assert round_header['deck'] == ['R']
-
-	round_header = game.round_header(1) # p2 header
-	assert round_header['round'] == 3
-	assert round_header['deck'] == ['S']
+	p1_header, p2_header = game.round_headers()
+	assert p1_header['round'] == 3
+	assert p1_header['deck'] == ['R']
+	assert p2_header['round'] == 3
+	assert p2_header['deck'] == ['S']
 
 	with pytest.raises(P1FoulException):
 		game.apply(['P', 'S']) # p1 can't play P

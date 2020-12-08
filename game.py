@@ -59,16 +59,17 @@ class BaseGame():
 			'players': self.players,
 		}
 
-	def round_header(self, player_idx):
-		# TODO: round_headers ?
-
+	def round_headers(self):
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
 
-		return {
-			'round': self.current_round,
-			'deck': self.decks[player_idx],
-		}
+		return [
+			{
+				'round': self.current_round,
+				'deck': self.decks[player_idx],
+			}
+			for player_idx in range(len(self.players))
+		]
 
 	def apply(self, hands):
 		if self.current_round > self.total_rounds:
@@ -102,8 +103,8 @@ class BaseGame():
 		self.current_round += 1
 
 		return [
-			{'opponent_hand': p2_card, },
-			{'opponent_hand': p1_card, },
+			{'opponent_hand': p2_hand, },
+			{'opponent_hand': p1_hand, },
 		]
 
 	def final_scores(self):
