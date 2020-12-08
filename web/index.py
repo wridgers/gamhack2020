@@ -41,6 +41,15 @@ You don't run the code, the system does. You can get data in a few ways:
 ## Links
 
 - [recent pairings](/recent_pairings.html)
+
+## Source code dumps
+
+(Will 404 until we make them!)
+
+- [First](/dump1.zip)
+- [Second](/dump2.zip)
+- [Third](/dump3.zip)
+- [Final](/dump4.zip)
 '''
 
 
