@@ -1,4 +1,5 @@
 import logging
+import math
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,8 +33,6 @@ class BaseGame():
 	}
 
 	GEN = -1
-
-	POOL = []
 	CARDS = set()
 
 	def __init__(self, players, rounds):
@@ -46,6 +45,10 @@ class BaseGame():
 		self.current_round = 1
 		self.total_rounds = rounds
 
+	@property
+	def pool(self):
+		return []
+
 	def game_header(self):
 		header = {
 			'gen': self.GEN,
@@ -53,8 +56,8 @@ class BaseGame():
 			'players': self.players,
 		}
 
-		if self.POOL:
-			header['pool'] = self.POOL
+		if self.pool:
+			header['pool'] = self.pool
 
 		return header
 
@@ -62,10 +65,13 @@ class BaseGame():
 		assert obj['ready'], "not ready"
 
 		if 'deck' in obj:
-			assert self.POOL, "no pool"
+			assert self.pool, "no pool"
 			assert not self.decks[player_idx], "already has deck"
-			assert all(x in self.POOL for x in obj['deck']), "invalid setup deck"
+			assert all(x in self.pool for x in obj['deck']), "invalid setup deck"
 			self.decks[player_idx] = obj['deck']
+
+		else:
+			assert not self.pool, "pool set, confusingly"
 
 		# TODO: hack...
 		if self.GEN == 0:
@@ -174,8 +180,12 @@ class GameGen2(BaseGame):
 	'''
 
 	GEN = 2
-	POOL = ['R'] * 5 + ['P'] * 5 + ['S'] * 5
 	CARDS = {'R', 'P', 'S'}
+
+	@property
+	def pool(self):
+		count = math.ceil(self.total_rounds / len(self.CARDS))
+		return ['R'] * count + ['P'] * count + ['S'] * count
 
 
 class GameGen3(BaseGame):

@@ -176,8 +176,16 @@ class Engine:
 
 def main():
 	tournament_id = sys.argv[1]
-	engine = Engine(tournament_id, 2, 6)
-	engine.run()
+
+	params = [
+		(0, 5, ),
+		(1, 6, ),
+		(2, 13, ),
+	]
+
+	for gen, rounds in params:
+		engine = Engine(tournament_id, gen, rounds)
+		engine.run()
 
 
 if __name__ == '__main__':
