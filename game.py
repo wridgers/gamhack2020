@@ -137,11 +137,18 @@ class BaseGame():
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
 
-		# TODO: no sanity checking here, plus hax to make tests work
-		p1_hand, p2_hand = hands
-		p1_card = p1_hand[0] if isinstance(p1_hand, list) else p1_hand
-		p2_card = p2_hand[0] if isinstance(p2_hand, list) else p2_hand
-		cards = (p1_card, p2_card)
+		assert len(hands) == 2, 'expected exactly two hands!'
+
+		for player_idx, hand in enumerate(hands):
+			try:
+				assert hand is not None, 'hand must be played'
+				assert len(hand) == 1, 'hand size should be exactly one'
+
+			except AssertionError as e:
+				self.end_in_favour_of(1 - player_idx)
+				raise [P1FoulException, P2FoulException][player_idx]('invalid hand: %r' % (hand, )) from e
+
+		cards = tuple([hand[0] for hand in hands])
 
 		for player_idx, card in enumerate(cards):
 			if not card or card not in self.decks[player_idx]:
