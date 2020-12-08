@@ -233,7 +233,7 @@ def main():
 	tournament_id = sys.argv[1]
 	gen, rounds = latest_engine_params()
 
-	engine = Engine("%s-%s" % (tournament_id, gen), gen, rounds)
+	engine = Engine(tournament_id, gen, rounds)
 	engine.run()
 
 
