@@ -33,7 +33,7 @@ def test_gen0_game():
 	# valid move nets p2 a point
 	game.apply(['R', 'P'])
 
-	assert(game.scores[0] == -1)
+	assert(game.scores[0] == 0)
 	assert(game.scores[1] == 1)
 
 	_p1_header, p2_header = game.round_headers()
@@ -46,7 +46,7 @@ def test_gen0_game():
 
 	# draw
 	game.apply(['S', 'S'])
-	assert(game.scores[0] == -1)
+	assert(game.scores[0] == 0)
 	assert(game.scores[1] == 1)
 
 	p1_header, _p2_header = game.round_headers()
@@ -101,7 +101,7 @@ def test_gen1_game():
 		game.round_headers()
 
 	p1_score, p2_score = game.final_scores()
-	assert(p1_score == -3)
+	assert(p1_score == 0)
 	assert(p2_score == 3)
 
 
