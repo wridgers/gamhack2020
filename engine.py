@@ -100,9 +100,11 @@ class Engine:
 					winning_player = round_players[winner - 1]
 					LOGGER.info("Round winner: %s", winning_player)
 					next_players.append(winning_player)
-				else:
+				elif winner == 0:
 					LOGGER.info("Draw: Both proceed")
 					next_players.extend(round_players)
+				else:
+					LOGGER.info("CHICKEN: Both players lose")
 			if len(players) % 2 == 1:
 				# last player gets a bye
 				LOGGER.info("Giving a bye to: %s", players[-1])
@@ -160,16 +162,16 @@ class Engine:
 			outcome = 'win'
 
 		except EverybodyDiesException:
-			outcome = 'chicken'
 			LOGGER.exception('EVERYBODY DIES.')
+			outcome = 'chicken'
 
 		except P1FoulException:
-			outcome = 'foul'
 			LOGGER.exception('%s fouled' % (player_names[0], ))
+			outcome = 'foul'
 
 		except P2FoulException:
-			outcome = 'foul'
 			LOGGER.exception('%s fouled' % (player_names[1], ))
+			outcome = 'foul'
 
 		scores = game.final_scores()
 		LOGGER.info('p1_score=%r, p2_score=%r', *scores)
@@ -178,6 +180,9 @@ class Engine:
 			outcome = 'draw'
 
 		save_pairing_result(self.tournament_id, self.gen, player_names[0], scores[0], player_names[1], scores[1], outcome)
+
+		if outcome == 'chicken':
+			return -1
 
 		if scores[0] > scores[1]:
 			return 1
