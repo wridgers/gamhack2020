@@ -1,6 +1,7 @@
 import importlib
 import json
 import logging
+import math
 import os
 import random
 import re
@@ -12,7 +13,7 @@ import queue
 
 from game import GameGen0, GameGen1, GameGen2, GameGen3
 from game import EverybodyDiesException, P1FoulException, P2FoulException
-from db import setupdb, save_pairing_result
+from db import setupdb, save_pairing_result, save_tournament_result
 
 LOGGER = logging.getLogger(__name__)
 
@@ -86,42 +87,71 @@ class Engine:
 				LOGGER.info("adding %s", entry.name)
 				yield entry.name
 
+	@staticmethod
+	def allocate_tournament(active_players):
+		random.shuffle(active_players)
+		rounds = math.ceil(math.log2(len(active_players)))
+		players = [None] * 2 ** rounds
+		i = 0
+		for player_name in active_players:
+			players[i] = player_name
+			i += 2
+			if i >= len(players):
+				i = 1
+		return players
+
+	def run_pairing(self, player_names):
+		if player_names[0] is None:
+			LOGGER.info("Bye for %s", player_names[1])
+			return player_names[1]
+		elif player_names[1] is None:
+			LOGGER.info("Bye for %s", player_names[0])
+			return player_names[0]
+		else:
+			LOGGER.info("Pairing %s against %s", *player_names)
+			winner = self.run_match(player_names)
+			if winner > 0:
+				winning_player = player_names[winner - 1]
+				LOGGER.info("Round winner: %s", winning_player)
+				return winning_player
+			elif winner == 0:
+				winning_player = random.choice(player_names)
+				LOGGER.info("Draw: %s wins randomly", winning_player)
+				return winning_player
+			else:
+				LOGGER.info("Both players lose")
+				return None
+
 	def run(self):
-		players = list(self.get_players())
-		random.shuffle(players)
+		players = self.allocate_tournament(list(self.get_players()))
+		LOGGER.info("Pairings: %s", players)
+		player_last_rounds = []
 		while len(players) > 1:
+			players_gone = []
 			LOGGER.info("NEW ROUND; players=%s", players)
 			next_players = []
+			assert abs(math.log2(len(players)) % 1) < 0.00001, players
 			for i in range(len(players) // 2):
-				round_players = players[i*2:i*2+2]
-				LOGGER.info("Pairing %s against %s", *round_players)
-				winner = self.run_pairing(round_players)
-				if winner > 0:
-					winning_player = round_players[winner - 1]
-					LOGGER.info("Round winner: %s", winning_player)
-					next_players.append(winning_player)
-				elif winner == 0:
-					LOGGER.info("Draw: Both proceed")
-					next_players.extend(round_players)
-				else:
-					LOGGER.info("CHICKEN: Both players lose")
-			if len(players) % 2 == 1:
-				# last player gets a bye
-				LOGGER.info("Giving a bye to: %s", players[-1])
-				next_players.append(players[-1])
-			if players == next_players:
-				LOGGER.info("Draw in final round!")
-				break
+				paired_players = players[i*2:i*2+2]
+				winning_player = self.run_pairing(paired_players)
+				for player in paired_players:
+					if player is not None and player != winning_player:
+						players_gone.append(player)
+				next_players.append(winning_player)
+			LOGGER.info("Eliminated players this round: %s", players_gone)
+			player_last_rounds.append(players_gone)
 			players = next_players
+		player_last_rounds.append(players)
+		save_tournament_result(self.tournament_id, player_last_rounds)
 
-		LOGGER.info("Tournament winner: %s", players[0])
+		LOGGER.info("Tournament winner: %s", players)
 
 	@staticmethod
 	def make_player(player_num, player_name):
 		module = importlib.import_module('bots.' + player_name)
 		return PlayerThread(player_num, module)
 
-	def run_pairing(self, player_names):
+	def run_match(self, player_names):
 		assert len(player_names) == 2
 		LOGGER.info('p1: %s, p2: %s', *player_names)
 
@@ -205,7 +235,7 @@ def main():
 	]
 
 	for gen, rounds in params:
-		engine = Engine(tournament_id, gen, rounds)
+		engine = Engine("%s-%s" % (tournament_id, gen), gen, rounds)
 		engine.run()
 
 

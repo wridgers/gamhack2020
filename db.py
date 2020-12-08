@@ -2,8 +2,8 @@ import sqlite3
 
 DB_FILE = 'hack.db'
 
-SCHEMA = '''
-
+SCHEMA = [
+'''
 create table if not exists pairing_results (
 	id integer primary key,
 	tournament_id text not null,
@@ -15,14 +15,23 @@ create table if not exists pairing_results (
 	outcome text not null,
 	t timestamp default current_timestamp
 );
-
+''',
 '''
+create table if not exists tournament_results (
+	id integer primary key,
+	tournament_id text not null,
+	player text not null,
+	elimination_round integer not null
+);
+''',
+]
 
 
 def setupdb():
 	conn = sqlite3.connect(DB_FILE)
 	cur = conn.cursor()
-	cur.execute(SCHEMA)
+	for statement in SCHEMA:
+		cur.execute(statement)
 
 	conn.commit()
 	conn.close()
@@ -47,6 +56,27 @@ def save_pairing_result(tournament_id, gen, p1_bot_name, p1_score, p2_bot_name, 
 	conn.commit()
 	conn.close()
 
+def save_tournament_result(tournament_id, rankings):
+	conn = sqlite3.connect(DB_FILE)
+	cur = conn.cursor()
+	for t_round, player_list in enumerate(rankings):
+		elimination_round = t_round - len(rankings) + 1
+		for player_name in player_list:
+			cur.execute(
+				'''
+					insert into tournament_results
+					(tournament_id, player, elimination_round)
+					values (?, ?, ?)
+				''',
+				(
+					tournament_id,
+					player_name,
+					elimination_round,
+				)
+			)
+
+	conn.commit()
+	conn.close()
 
 if __name__ == '__main__':
 	setupdb()
