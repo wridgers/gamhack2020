@@ -15,7 +15,7 @@ class Player(base.Player):
 		}
 
 		if 'pool' in header:
-			setup['deck'] = sorted(header['pool'])[:rounds]
+			setup['deck'] = sorted(header['pool'], reverse=True)[:rounds]
 
 		self.send(setup)
 
@@ -24,7 +24,7 @@ class Player(base.Player):
 			deck = round_header['deck']
 
 			self.send({
-				'hand': min(deck),
+				'hand': max(deck),
 			})
 
 			_response = self.receive()
