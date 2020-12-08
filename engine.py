@@ -59,13 +59,18 @@ class PlayerThread(threading.Thread):
 
 
 class Engine:
-	game_class = GameGen2
+	game_classes = [
+		GameGen0,
+		GameGen1,
+		GameGen2,
+	]
 
-	def __init__(self, tournament_id):
+	def __init__(self, tournament_id, gen, rounds):
 		self.tournament_id = tournament_id
 		self.players = []
 
-		self.rounds = 6
+		self.gen = gen
+		self.rounds = rounds
 
 	def get_players(self):
 		module_re = re.compile('^[a-z0-9][a-z0-9_]+$')
@@ -122,7 +127,7 @@ class Engine:
 			players.append(player)
 
 		try:
-			game = self.game_class(player_names, self.rounds)
+			game = self.game_classes[self.gen](player_names, self.rounds)
 
 			for player in players:
 				player.send(game.game_header())
@@ -171,7 +176,7 @@ class Engine:
 
 def main():
 	tournament_id = sys.argv[1]
-	engine = Engine(tournament_id)
+	engine = Engine(tournament_id, 2, 6)
 	engine.run()
 
 
