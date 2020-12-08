@@ -1,3 +1,4 @@
 hack.db
 /www
 __pycache__
+bots/team*
