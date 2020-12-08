@@ -4,7 +4,7 @@ import sqlite3
 import markdown2
 from jinja2 import Template
 
-RULES = '''
+HEADER = '''
 # GAMHACK 2020
 
 You should be able to do `git clone teamX@gamhack2020.smithersbet.com`, where `X` is your team number. SSH keys were
@@ -20,15 +20,82 @@ returning in a timely fashion.
 
 ## Protocol
 
+Unless otherwise stated, each generation carries over rules from the previous generation.
+'''
+
+# GEN 0 ########################################################################
+
+PROTOCOL_RULES = ['''
+### Generation 0
+
+#### Protocol
+
 The protocol consists of:
 
-1. You will receive a "header" dictionary. This will tell you things like your opponent's name, how many rounds you will play, and any other info.
-2. You must send a dictionary which says at least `"ready": True`.
+1. You will receive a `game_header` dictionary. This will tell you things like your opponent's name, how many rounds you will play, and any other info.
+2. You must send a dictionary which says `"ready": True` to indicate you have recveived the `game_header` and are ready to play.
 3. For each round:
-	1. You will receive a round header dictionary. This will contain at least the key `deck`, which tells you what you can choose to play from.
+	1. You will receive a `round_header` dictionary. This will contain at least the key `deck`, which tells you what you can choose to play from.
 	2. You must send a dictionary containing at least `hand`, which must be an element of `deck`.
 	3. The system will send you a round end response. This may contain the key `"ended": True` which indicates this was the final round.
 4. After the final round, your `run` function must return.
+
+##### Examples
+
+- `game_header`, `{'gen': 0, 'rounds': 3, 'players': ['lightningbot', 'hahbot']}`
+- `round_header`, `{'idx': 0, 'round': 1, 'deck': ['R', 'P', 'S']}`
+- `round_footer`, `{'idx': 1, 'hands': ['P', 'S'], 'scores': [0, 1]}`
+- `idx` is your index in `players`, `hands`, and `scores`
+
+#### Deck
+
+Each players deck is 3x the size of `rounds` and contains equal amounts of:
+
+- **R**ock
+- **P**aper
+- **S**cissors
+
+#### Hands
+
+- You score a point for winning a hand.
+- You score no points for losing a hand.
+- The payoff grid looks exactly how you expect.
+
+#### Fouling
+
+It is possible to foul by timeout, crash, invalid hand. If you foul, you lose the game.
+
+''',
+
+# GEN 1 ########################################################################
+
+'''
+### Generation 1
+
+Each players deck is now the size of `rounds` and consists of exactly equal quantities of each of the three cards.
+''',
+
+# GEN 2 ########################################################################
+
+'''
+### Generation 2
+
+TODO
+''',
+
+# GEN 3 ########################################################################
+
+'''
+### Generation 3
+
+TODO
+''',
+]
+
+FOOTER = '''
+## Changelog
+
+As we change parts of the game (e.g. fix bugs, balance issues) we will try to update this section (and announce in Mattermost).
 
 ## Logging
 
@@ -66,11 +133,31 @@ TEMPLATE = '''<html>
 </html>
 '''
 
-def main():
-	template = Template(TEMPLATE)
-	markdown = markdown2.markdown(RULES)
 
-	print(template.render(markdown=markdown, now=str(dt.datetime.now())))
+def latest_engine_params():
+	conn = sqlite3.connect('hack.db')
+	cur = conn.cursor()
+	cur.execute('select generation from engine order by cr_date desc limit 1')
+
+	row = cur.fetchone()
+
+	conn.commit()
+	conn.close()
+
+	if row:
+		(gen, ) = row
+	else:
+		gen = 0
+
+	return gen
+
+
+def main():
+	gen = latest_engine_params()
+	rules = ''.join([HEADER] + PROTOCOL_RULES[:(gen + 1)] + [FOOTER])
+	markdown = markdown2.markdown(rules)
+
+	print(Template(TEMPLATE).render(markdown=markdown, now=str(dt.datetime.now())))
 
 
 if __name__ == '__main__':
