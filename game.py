@@ -33,6 +33,7 @@ class BaseGame():
 
 	GEN = -1
 
+	# TODO: check decks are legal (only contain CARDS)
 	CARDS = {'R', 'P', 'S'}
 
 	def __init__(self, players, rounds, decks):
@@ -73,26 +74,22 @@ class BaseGame():
 		p1_hand, p2_hand = hands
 		p1_card = p1_hand[0] if isinstance(p1_hand, list) else p1_hand
 		p2_card = p2_hand[0] if isinstance(p2_hand, list) else p2_hand
+		cards = (p1_card, p2_card)
 
-		if not p1_card or p1_card not in self.decks[0]:
-			self.current_round = self.total_rounds + 1  # TODO: gross hack to 'end' the game
-			self.scores = [-1, 1] # p1 loses
+		for player_idx, card in enumerate(cards):
+			if not card or card not in self.decks[player_idx]:
+				# gross hacks to 'end' the game
+				self.current_round = self.total_rounds + 1
+				self.scores = [[-1, 1], [1, -1]][player_idx]
+				raise [P1FoulException, P2FoulException][player_idx]('invalid card: %s' % (card, ))
 
-			raise P1FoulException('invalid card')
+		payoffs = self.PAYOFF_TABLE[cards]
 
-		if not p2_card or p2_card not in self.decks[1]:
-			self.current_round = self.total_rounds + 1  # TODO: gross hack to 'end' the game
-			self.scores = [1, -1] # p2 loses
+		for player_idx, card in enumerate(cards):
+			self.decks[player_idx].remove(card)
 
-			raise P2FoulException('invalid card')
-
-		self.decks[0].remove(p1_card)
-		self.decks[1].remove(p2_card)
-
-		payoffs = self.PAYOFF_TABLE[p1_card, p2_card]
-
-		self.scores[0] += payoffs[0]
-		self.scores[1] += payoffs[1]
+		for player_idx, payoff in enumerate(payoffs):
+			self.scores[player_idx] += payoff
 
 		self.current_round += 1
 
