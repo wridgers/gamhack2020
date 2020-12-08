@@ -5,23 +5,15 @@ from jinja2 import Template
 
 TEMPLATE = '''<html>
 	<head>
-		<title>gamhack2020</title>
 		<style>
-		 table, th, td {
-		  border: 1px solid black;
-		}
+			table, th, td {
+				border: 1px solid black;
+			}
 		</style>
 	</head>
 
 	<body>
-		<h1>gamhack2020</h1>
-
-		<ul>
-			<li><a href="./rules.html">rules</a></li>
-		</ul>
-
-		<h2>recent pairings</h2>
-		<table>
+		<table style="width: 100%;">
 			<thead>
 				<tr>
 					<td>id</td>
