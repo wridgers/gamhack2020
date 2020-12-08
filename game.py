@@ -62,22 +62,21 @@ class BaseGame():
 		return header
 
 	def setup(self, player_idx, obj):
-		assert obj['ready'], "not ready"
+		try:
+			assert obj['ready'], "not ready"
 
-		if 'deck' in obj:
-			assert self.pool, "no pool"
-			assert not self.decks[player_idx], "already has deck"
-			assert all(x in self.pool for x in obj['deck']), "invalid setup deck"
-			self.decks[player_idx] = obj['deck']
+			if 'deck' in obj:
+				assert self.pool, "no pool"
+				assert not self.decks[player_idx], "already has deck"
+				assert all(x in self.pool for x in obj['deck']), "invalid setup deck"
+				assert len(obj['deck']) == self.total_rounds, "incorrect deck size"
+				self.decks[player_idx] = obj['deck']
 
-		else:
-			assert not self.pool, "pool set, confusingly"
-
-		# TODO: hack...
-		if self.GEN == 0:
-			assert len(self.decks[player_idx]) == self.total_rounds * len(self.CARDS), "incorrect deck size"
-		else:
-			assert len(self.decks[player_idx]) == self.total_rounds, "incorrect deck size"
+		except AssertionError as e:
+			# TODO: gross hacks to 'end' the game
+			self.current_round = self.total_rounds + 1
+			self.scores = [[-1, 1], [1, -1]][player_idx]
+			raise [P1FoulException, P2FoulException][player_idx]() from e
 
 	def round_headers(self):
 		if self.current_round > self.total_rounds:
