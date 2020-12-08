@@ -1,10 +1,18 @@
 import logging
 import math
+import random
 
 from itertools import groupby
 
 LOGGER = logging.getLogger(__name__)
 
+
+def filter_nones(obj):
+	return {
+		k: v
+		for k, v in obj.items()
+		if v is not None
+	}
 
 class GameException(Exception):
 	pass
@@ -44,10 +52,27 @@ class BaseGame():
 		('R', 'K'): (0, 1),
 		('P', 'K'): (0, 1),
 		('S', 'K'): (0, 1),
+
+		('L', 'L'): (0, 0),
+
+		('L', 'R'): (0, 1),
+		('L', 'P'): (0, 1),
+		('L', 'S'): (0, 1),
+		('L', 'K'): (0, 1),
+
+		('R', 'L'): (1, 0),
+		('P', 'L'): (1, 0),
+		('S', 'L'): (1, 0),
+		('K', 'L'): (1, 0),
 	}
 
 	GEN = -1
 	CARDS = set()
+
+	RPS_COST = 0
+	KILL_COST = 1
+	LOOK_COST = 5
+	LOOK_SIZE = 3
 
 	def __init__(self, players, rounds):
 		assert len(players) == 2
@@ -64,16 +89,12 @@ class BaseGame():
 		return []
 
 	def game_header(self):
-		header = {
+		return filter_nones({
 			'gen': self.GEN,
 			'rounds': self.total_rounds,
+			'pool': self.pool or None,
 			'players': self.players,
-		}
-
-		if self.pool:
-			header['pool'] = self.pool
-
-		return header
+		})
 
 	def setup(self, player_idx, obj):
 		try:
@@ -93,7 +114,13 @@ class BaseGame():
 
 				for card in obj['deck']:
 					if card == 'K':
-						self.scores[player_idx] -= 1
+						card_cost = self.KILL_COST
+					elif card == 'L':
+						card_cost = self.LOOK_COST
+					else:
+						card_cost = self.RPS_COST
+
+					self.scores[player_idx] -= card_cost
 
 				self.decks[player_idx] = obj['deck']
 
@@ -136,6 +163,7 @@ class BaseGame():
 			self.end_in_favour_of(None)
 			raise EverybodyDiesException('both players played K')
 
+		looks = [x == 'L' for x in cards]
 		payoffs = self.PAYOFF_TABLE[cards]
 
 		for player_idx, card in enumerate(cards):
@@ -147,11 +175,12 @@ class BaseGame():
 		self.current_round += 1
 
 		return [
-			{
+			filter_nones({
 				'idx': player_idx,
 				'hands': hands,
 				'scores': self.scores,
-			}
+				'look': None if not looks[player_idx] else random.sample(self.decks[1 - player_idx], self.LOOK_SIZE)
+			})
 			for player_idx in range(len(self.players))
 		]
 
@@ -232,12 +261,12 @@ class GameGen3(BaseGame):
 	'''
 
 	GEN = 3
-	CARDS = {'R', 'P', 'S', 'K'}
+	CARDS = {'R', 'P', 'S', 'K', 'L'}
 
 	@property
 	def pool(self):
 		count = math.ceil(self.total_rounds / 3)
-		return ['R'] * count + ['P'] * count + ['S'] * count + ['K']
+		return ['R'] * count + ['P'] * count + ['S'] * count + ['K'] + ['L']
 
 
 class GameGen4(BaseGame):
