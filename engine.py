@@ -129,13 +129,13 @@ class Engine:
 				for idx, player in enumerate(players):
 					player.send(game.round_header(idx))
 
-				moves = []
+				hands = []
 				for player in players:
-					moves.append(player.receive()['hand'][0])
+					hands.append(player.receive().get('hand', None))
 
-				LOGGER.info('p1_move=%r, p2_move=%r', *moves)
+				LOGGER.info('p1_hand=%r, p2_hand=%r', *hands)
 
-				responses = game.apply(*moves)
+				responses = game.apply(hands)
 
 				for idx, response in enumerate(responses):
 					players[idx].send(response)

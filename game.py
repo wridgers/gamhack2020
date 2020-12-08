@@ -70,13 +70,14 @@ class BaseGame():
 			'deck': self.decks[player_idx],
 		}
 
-	def apply(self, p1_card, p2_card):
+	def apply(self, hands):
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
 
-		# TODO: hands = [p1_hand, p2_hand]
-		# TODO: Add 'ALLOW_NONE' mode?
-		# TODO: What if both foul? considering player order is random, I think it's fine to fail the first.
+		# no sanity checking here, plus hax to make tests work
+		p1_hand, p2_hand = hands
+		p1_card = p1_hand[0] if isinstance(p1_hand, list) else p1_hand
+		p2_card = p2_hand[0] if isinstance(p2_hand, list) else p2_hand
 
 		if not p1_card or p1_card not in self.decks[0]:
 			self.current_round = self.total_rounds + 1  # TODO: gross hack to 'end' the game
