@@ -204,3 +204,25 @@ def test_gen3_game_l():
 	assert compare(p2_response['look'], ['R', 'R'])
 
 	assert game.scores == [1, 1]
+
+
+def test_gen3_game_t():
+	game = GameGen3(['p1', 'p2'], 2)
+	game.decks = [
+		['R', 'T'],
+		['P', 'S'],
+	]
+
+	p1_response, p2_response = game.apply(['T', 'S'])
+
+	assert p1_response['took'] in ('P', 'S')
+
+	assert 'took' not in p2_response
+
+	# there's only one hand left, but the thief is a card up
+	assert len(game.decks[0]) == 2
+
+	# p2 only has left what p1 didn't steal
+	p2_deck = ['P', 'S']
+	p2_deck.remove(p1_response['took'])
+	assert game.decks[1] == p2_deck
