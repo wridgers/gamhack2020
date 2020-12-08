@@ -45,32 +45,32 @@ class BaseGame():
 		('S', 'R'): (0, 1),
 		('S', 'P'): (1, 0),
 
-		('K', 'R'): (1, 0),
-		('K', 'P'): (1, 0),
-		('K', 'S'): (1, 0),
+		('C', 'R'): (1, 0),
+		('C', 'P'): (1, 0),
+		('C', 'S'): (1, 0),
 
-		('R', 'K'): (0, 1),
-		('P', 'K'): (0, 1),
-		('S', 'K'): (0, 1),
+		('R', 'C'): (0, 1),
+		('P', 'C'): (0, 1),
+		('S', 'C'): (0, 1),
 
 		('L', 'L'): (0, 0),
 
 		('L', 'R'): (0, 1),
 		('L', 'P'): (0, 1),
 		('L', 'S'): (0, 1),
-		('L', 'K'): (0, 1),
+		('L', 'C'): (0, 1),
 
 		('R', 'L'): (1, 0),
 		('P', 'L'): (1, 0),
 		('S', 'L'): (1, 0),
-		('K', 'L'): (1, 0),
+		('C', 'L'): (1, 0),
 	}
 
 	GEN = -1
 	CARDS = set()
 
 	RPS_COST = 0
-	KILL_COST = 1
+	CHICKEN_COST = 1
 	LOOK_COST = 5
 	LOOK_SIZE = 3
 
@@ -113,8 +113,8 @@ class BaseGame():
 				), 'invalid setup deck'
 
 				for card in obj['deck']:
-					if card == 'K':
-						card_cost = self.KILL_COST
+					if card == 'C':
+						card_cost = self.CHICKEN_COST
 					elif card == 'L':
 						card_cost = self.LOOK_COST
 					else:
@@ -159,9 +159,9 @@ class BaseGame():
 				self.end_in_favour_of(1 - player_idx)
 				raise [P1FoulException, P2FoulException][player_idx]('invalid card: %s' % (card, ))
 
-		if cards == ('K', 'K'):
+		if cards == ('C', 'C'):
 			self.end_in_favour_of(None)
-			raise EverybodyDiesException('both players played K')
+			raise EverybodyDiesException('both players played CHICKEN')
 
 		looks = [x == 'L' for x in cards]
 		payoffs = self.PAYOFF_TABLE[cards]
@@ -257,16 +257,16 @@ class GameGen2(BaseGame):
 
 class GameGen3(BaseGame):
 	'''
-	Gen2 but with more cards, KILL (K), LOOK (L), and TAKE (T).
+	Gen2 but with more cards, CHICKEN (C), LOOK (L), and TAKE (T).
 	'''
 
 	GEN = 3
-	CARDS = {'R', 'P', 'S', 'K', 'L'}
+	CARDS = {'R', 'P', 'S', 'C', 'L'}
 
 	@property
 	def pool(self):
 		count = math.ceil(self.total_rounds / 3)
-		return ['R'] * count + ['P'] * count + ['S'] * count + ['K'] + ['L']
+		return ['R'] * count + ['P'] * count + ['S'] * count + ['C'] + ['L']
 
 
 class GameGen4(BaseGame):
@@ -275,4 +275,4 @@ class GameGen4(BaseGame):
 	'''
 
 	GEN = 4
-	CARDS = {'R', 'P', 'S', 'K', 'P'}
+	CARDS = {'R', 'P', 'S', 'C', 'L'}

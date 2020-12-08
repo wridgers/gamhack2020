@@ -172,11 +172,11 @@ def test_gen2_setup(deck, foul):
 def test_gen3_game_k():
 	game = GameGen3(['p1', 'p2'], 7)
 	game.decks = [
-		['R', 'R', 'P', 'P', 'S', 'S', 'K'],
-		['R', 'R', 'P', 'P', 'S', 'S', 'K'],
+		['R', 'R', 'P', 'P', 'S', 'S', 'C'],
+		['R', 'R', 'P', 'P', 'S', 'S', 'C'],
 	]
 
 	with pytest.raises(EverybodyDiesException):
-		game.apply(['K', 'K'])
+		game.apply(['C', 'C'])
 
 	assert game.final_scores() == [-1, -1]
