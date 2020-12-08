@@ -12,7 +12,7 @@ import queue
 
 from game import GameGen0, GameGen1, GameGen2, GameGen3
 from game import EverybodyDiesException, P1FoulException, P2FoulException
-from db import setupdb, save_result
+from db import setupdb, save_pairing_result
 
 LOGGER = logging.getLogger(__name__)
 
@@ -112,6 +112,8 @@ class Engine:
 				break
 			players = next_players
 
+		LOGGER.info("Tournament winner: %s", players[0])
+
 	@staticmethod
 	def make_player(player_num, player_name):
 		module = importlib.import_module('bots.' + player_name)
@@ -155,20 +157,27 @@ class Engine:
 			for idx, player in enumerate(players):
 				player.join()
 
+			outcome = 'win'
+
 		except EverybodyDiesException:
+			outcome = 'chicken'
 			LOGGER.exception('EVERYBODY DIES.')
 
 		except P1FoulException:
+			outcome = 'foul'
 			LOGGER.exception('%s fouled' % (player_names[0], ))
 
 		except P2FoulException:
+			outcome = 'foul'
 			LOGGER.exception('%s fouled' % (player_names[1], ))
 
 		scores = game.final_scores()
-
 		LOGGER.info('p1_score=%r, p2_score=%r', *scores)
 
-		save_result(self.tournament_id, 0, player_names[0], scores[0], player_names[1], scores[1])
+		if outcome == 'win' and scores[0] == scores[1]:
+			outcome = 'draw'
+
+		save_pairing_result(self.tournament_id, self.gen, player_names[0], scores[0], player_names[1], scores[1], outcome)
 
 		if scores[0] > scores[1]:
 			return 1

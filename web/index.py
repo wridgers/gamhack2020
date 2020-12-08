@@ -20,18 +20,20 @@ TEMPLATE = '''<html>
 			<li><a href="./rules.html">rules</a></li>
 		</ul>
 
-		<h2>recent results</h2>
+		<h2>recent pairings</h2>
 		<table>
 			<thead>
 				<tr>
 					<td>id</td>
+					<td>tournament id</td>
 					<td>gen</td>
 					<td>p1</td>
 					<td>p1 score</td>
 					<td>p2</td>
 					<td>p2 score</td>
+					<td>outcome</td>
 					<td>when</td>
-					<td>tournament id</td>
+					<td>logs id</td>
 				</tr>
 			</thead>
 
@@ -39,13 +41,16 @@ TEMPLATE = '''<html>
 				{% for result in results %}
 					<tr>
 						<td>{{ result[0] }}</td>
+						<td>{{ result[1] }}</td>
 						<td>{{ result[2] }}</td>
 						<td>{{ result[3] }}</td>
 						<td>{{ result[4] }}</td>
 						<td>{{ result[5] }}</td>
 						<td>{{ result[6] }}</td>
 						<td>{{ result[7] }}</td>
-						<td><a href="logs/{{ result[1] }}.txt">logs</a></td>
+						<td>{{ result[8] }}</td>
+
+						<td><a href="/logs/{{ result[1] }}.txt">logs</a></td>
 					</tr>
 				{% endfor %}
 			</tbody>
@@ -60,7 +65,7 @@ def main():
 	conn = sqlite3.connect('hack.db')
 
 	cur = conn.cursor()
-	cur.execute('select * from results order by t desc limit 20')
+	cur.execute('select * from pairing_results order by t desc limit 100')
 	results = cur.fetchall()
 
 	conn.commit()

@@ -217,7 +217,6 @@ class BaseGame():
 		else:
 			self.scores = [-1, -1]
 
-
 	def final_scores(self):
 		if self.current_round <= self.total_rounds:
 			raise GameException('game is not over')
@@ -278,7 +277,7 @@ class GameGen2(BaseGame):
 		return ['R'] * count + ['P'] * count + ['S'] * count
 
 
-class GameGen3(BaseGame):
+class GameGen3(GameGen2):
 	'''
 	Gen2 but with more cards, CHICKEN (C), LOOK (L), and TAKE (T).
 	'''
@@ -292,10 +291,10 @@ class GameGen3(BaseGame):
 		return ['R'] * count + ['P'] * count + ['S'] * count + ['C'] + ['L'] + ['T']
 
 
-class GameGen4(BaseGame):
+class GameGen4(GameGen3):
 	'''
 	Gen3 but with card picking at the beginning.
 	'''
 
 	GEN = 4
-	CARDS = {'R', 'P', 'S', 'C', 'L'}
+	CARDS = {'R', 'P', 'S', 'C', 'L', 'T'}
