@@ -141,6 +141,9 @@ class Engine:
 			LOGGER.info("Eliminated players this round: %s", players_gone)
 			player_last_rounds.append(players_gone)
 			players = next_players
+		if players == [None]:
+			# Last round chicken fix.
+			players = []
 		player_last_rounds.append(players)
 		save_tournament_result(self.tournament_id, player_last_rounds)
 
