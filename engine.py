@@ -10,7 +10,8 @@ import sys
 import threading
 import queue
 
-from game import GameGen0, P1FoulException, P2FoulException
+from game import GameGen0, GameGen1
+from game import P1FoulException, P2FoulException
 from db import setupdb, save_result
 
 LOGGER = logging.getLogger(__name__)
@@ -53,13 +54,13 @@ class PlayerThread(threading.Thread):
 
 
 class Engine:
-	game_class = GameGen0
+	game_class = GameGen1
 
 	def __init__(self, tournament_id):
 		self.tournament_id = tournament_id
 		self.players = []
 
-		self.rounds = 5
+		self.rounds = 6
 
 	def get_players(self):
 		module_re = re.compile('^[a-z0-9][a-z0-9_]+$')
@@ -144,10 +145,10 @@ class Engine:
 				player.join()
 
 		except P1FoulException:
-			LOGGER.exception('p1 fouled. bad p1')
+			LOGGER.exception('%s fouled' % (player_names[0], ))
 
 		except P2FoulException:
-			LOGGER.exception('p2 fouled. bad p2')
+			LOGGER.exception('%s fouled' % (player_names[1], ))
 
 		scores = game.final_scores()
 

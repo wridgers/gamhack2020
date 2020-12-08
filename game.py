@@ -60,6 +60,7 @@ class BaseGame():
 
 		return [
 			{
+				'idx': player_idx,
 				'round': self.current_round,
 				'deck': self.decks[player_idx],
 			}
@@ -94,8 +95,12 @@ class BaseGame():
 		self.current_round += 1
 
 		return [
-			{'opponent_hand': p2_hand, },
-			{'opponent_hand': p1_hand, },
+			{
+				'idx': player_idx,
+				'hands': hands,
+				'scores': self.scores,
+			}
+			for player_idx in range(len(self.players))
 		]
 
 	def final_scores(self):
