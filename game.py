@@ -50,7 +50,9 @@ class BaseGame():
 	CARDS = set()
 
 	RPS_COST = 0
+
 	CHICKEN_COST = 1
+
 	LOOK_COST = 5
 	LOOK_SIZE = 3
 
@@ -102,6 +104,8 @@ class BaseGame():
 
 					self.scores[player_idx] -= card_cost
 
+				# assert self.scores[player_idx] >= 0, 'over-bought'
+
 				self.decks[player_idx] = obj['deck']
 
 			else:
@@ -124,6 +128,11 @@ class BaseGame():
 			for player_idx in range(len(self.players))
 		]
 
+	def look(self, player_idx):
+		deck = self.decks[player_idx]
+		look_size = min(len(deck), self.LOOK_SIZE)
+		return random.sample(deck, look_size)
+
 	def apply(self, hands):
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
@@ -140,7 +149,10 @@ class BaseGame():
 				raise [P1FoulException, P2FoulException][player_idx]('invalid card: %s' % (card, ))
 
 		chickens = [x == 'C' for x in cards]
+		rps = [x in ('R', 'P', 'S') for x in cards]
+
 		looks = [x == 'L' for x in cards]
+		thieves = [x == 'T' for x in cards]
 
 		if all(chickens):
 			self.end_in_favour_of(None)
@@ -149,11 +161,14 @@ class BaseGame():
 		elif any(chickens):
 			payoffs = [1 if x else 0 for x in chickens]
 
-		elif all(looks):
+		elif not any(rps):
 			payoffs = [0] * len(self.players)
 
 		elif any(looks):
 			payoffs = [0 if x else 1 for x in looks]
+
+		elif any(thieves):
+			payoffs = [0 if x else 1 for x in thieves]
 
 		else:
 			payoffs = self.PAYOFF_TABLE[cards]
@@ -166,12 +181,28 @@ class BaseGame():
 
 		self.current_round += 1
 
+		took = []
+		for player_idx, thieve in enumerate(thieves):
+			if not thieve or any(chickens):
+				took.append(None)
+				continue
+
+			# return played card to target of theft
+			self.decks[1 - player_idx].append(cards[1 - player_idx])
+
+			stolen_card = random.choice(self.decks[1 - player_idx])
+			self.decks[1 - player_idx].remove(stolen_card)
+			self.decks[player_idx].append(stolen_card)
+
+			took.append(stolen_card)
+
 		return [
 			filter_nones({
 				'idx': player_idx,
 				'hands': hands,
 				'scores': self.scores,
-				'look': None if not looks[player_idx] else random.sample(self.decks[1 - player_idx], self.LOOK_SIZE)
+				'look': self.look(1 - player_idx) if looks[player_idx] and not any(chickens) else None,
+				'took': took[player_idx],
 			})
 			for player_idx in range(len(self.players))
 		]
@@ -253,12 +284,12 @@ class GameGen3(BaseGame):
 	'''
 
 	GEN = 3
-	CARDS = {'R', 'P', 'S', 'C', 'L'}
+	CARDS = {'R', 'P', 'S', 'C', 'L', 'T'}
 
 	@property
 	def pool(self):
 		count = math.ceil(self.total_rounds / 3)
-		return ['R'] * count + ['P'] * count + ['S'] * count + ['C'] + ['L']
+		return ['R'] * count + ['P'] * count + ['S'] * count + ['C'] + ['L'] + ['T']
 
 
 class GameGen4(BaseGame):

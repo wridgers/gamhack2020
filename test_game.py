@@ -1,3 +1,5 @@
+import collections
+
 import pytest
 
 from game import BaseGame, GameGen0, GameGen1, GameGen2, GameGen3
@@ -180,3 +182,25 @@ def test_gen3_game_k():
 		game.apply(['C', 'C'])
 
 	assert game.final_scores() == [-1, -1]
+
+
+def test_gen3_game_l():
+	game = GameGen3(['p1', 'p2'], 4)
+	game.decks = [
+		['R', 'R', 'R', 'L'],
+		['P', 'R', 'P', 'L'],
+	]
+	compare = lambda x, y: collections.Counter(x) == collections.Counter(y)
+
+
+	p1_response, p2_response = game.apply(['L', 'P'])
+	assert compare(p1_response['look'], ['P', 'R', 'L'])
+	assert 'look' not in p2_response
+
+	assert game.scores == [0, 1]
+
+	p1_response, p2_response = game.apply(['R', 'L'])
+	assert 'look' not in p1_response
+	assert compare(p2_response['look'], ['R', 'R'])
+
+	assert game.scores == [1, 1]
