@@ -53,9 +53,6 @@ class PlayerThread(threading.Thread):
 
 
 class Engine:
-	FOUL_COST = -100
-	FOUL_WIN = 1
-
 	game_class = GameGen0
 
 	def __init__(self, tournament_id):
@@ -146,15 +143,13 @@ class Engine:
 			for idx, player in enumerate(players):
 				player.join()
 
-			scores = game.final_scores()
-
 		except P1FoulException:
 			LOGGER.exception('p1 fouled. bad p1')
-			scores = [self.FOUL_COST, self.FOUL_WIN]
 
 		except P2FoulException:
 			LOGGER.exception('p2 fouled. bad p2')
-			scores = [self.FOUL_WIN, self.FOUL_COST]
+
+		scores = game.final_scores()
 
 		LOGGER.info('p1_score=%r, p2_score=%r', *scores)
 

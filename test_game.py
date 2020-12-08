@@ -1,19 +1,21 @@
 import pytest
 
-from game import BaseGame, GameGen0, GameGen1, GameGen2, GameException
+from game import BaseGame, GameGen0, GameGen1, GameGen2
+from game import P1FoulException, P2FoulException, GameException
 
 
-def test_base_game_none():
+@pytest.mark.parametrize('moves, exception, scores', [
+	[(None, 'S'), P1FoulException, [-1, 1]],
+	[('R', None), P2FoulException, [1, -1]],
+	[(None, None), P1FoulException, [-1, 1]],
+])
+def test_base_game_none(moves, exception, scores):
 	game = BaseGame(['p1', 'p2'], 3, [['R'] * 3, ['S'] * 3])
 
-	# None means bot didn't provide a hand in time
-	game.apply(None, 'S')
-	game.apply('R', None)
-	game.apply(None, None)
+	with pytest.raises(exception):
+		game.apply(*moves)
 
-	p1_score, p2_score = game.final_scores()
-	assert(p1_score == 0)
-	assert(p2_score == 0)
+	assert game.final_scores() == scores
 
 
 def test_gen0_game():
@@ -38,31 +40,31 @@ def test_gen0_game():
 	assert round_header['round'] == 2
 	assert len(round_header['deck']) == 8
 
-	# invalid move from p2 nets p1 a point, and punishes p2
-	game.apply('R', '?')
-	assert(game.scores[0] == 0)
-	assert(game.scores[1] == 0)
-
 	# game is not over, raise
 	with pytest.raises(GameException):
 		game.final_scores()
+
+	# draw
+	game.apply('S', 'S')
+	assert(game.scores[0] == -1)
+	assert(game.scores[1] == 1)
 
 	round_header = game.round_header(0) # p1 header
 	assert round_header['round'] == 3
 	assert len(round_header['deck']) == 7
 
-	# draw
-	game.apply('S', 'S')
-	assert(game.scores[0] == 0)
-	assert(game.scores[1] == 0)
+	# invalid move from p2 nets p1 a point, and punishes p2
+	with pytest.raises(P2FoulException):
+		game.apply('R', '?')
 
 	# game is over, raise
 	with pytest.raises(GameException):
 		game.apply('?', '?')
 
+	# p2 fouled, so loses
 	p1_score, p2_score = game.final_scores()
-	assert(p1_score == 0)
-	assert(p2_score == 0)
+	assert(p1_score == 1)
+	assert(p2_score == -1)
 
 
 def test_gen1_game():
@@ -108,14 +110,12 @@ def test_gen1_game():
 def test_gen1_game_invalid_move():
 	game = GameGen1(['p1', 'p2'], 3)
 
-	# p2 plays P twice, oops
-	game.apply('R', 'P') # p2 win
-	game.apply('S', 'P') # p2 bad
-	game.apply('P', 'S') # p2 win
+	game.apply('R', 'P')
 
-	p1_score, p2_score = game.final_scores()
-	assert(p1_score == - 1 + game.BAD_PLAY_REWARD - 1)
-	assert(p2_score == + 1 + game.BAD_PLAY_COST + 1)
+	with pytest.raises(P2FoulException):
+		game.apply('S', 'P') # p2 plays P twice, oops
+
+	assert game.final_scores() == [1, -1]
 
 
 def test_gen2_game():
@@ -127,22 +127,17 @@ def test_gen2_game():
 	assert game_header['players'] == ['p1', 'p2']
 
 	game.apply('R', 'S')
-	game.apply('P', 'S') # p1 can't play P
+	game.apply('R', 'S')
 
 	round_header = game.round_header(0) # p1 header
 	assert round_header['round'] == 3
-	assert round_header['deck'] == ['R', 'R']
+	assert round_header['deck'] == ['R']
 
 	round_header = game.round_header(1) # p2 header
 	assert round_header['round'] == 3
 	assert round_header['deck'] == ['S']
 
-	game.apply('R', 'S')
+	with pytest.raises(P1FoulException):
+		game.apply('P', 'S') # p1 can't play P
 
-	p1_score, p2_score = game.final_scores()
-	assert(p1_score == 1 + 1 + game.BAD_PLAY_COST)
-	assert(p2_score == -1 -1 + game.BAD_PLAY_REWARD)
-
-	# p1 has an R left, but p2 has an empty deck
-	assert(game.decks[0] == ['R'])
-	assert(not game.decks[1])
+	assert game.final_scores() == [-1, 1]

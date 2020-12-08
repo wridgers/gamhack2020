@@ -60,6 +60,8 @@ class BaseGame():
 		}
 
 	def round_header(self, player_idx):
+		# TODO: round_headers ?
+
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
 
@@ -72,27 +74,29 @@ class BaseGame():
 		if self.current_round > self.total_rounds:
 			raise GameException('game is over')
 
-		if p1_card in self.decks[0] and p2_card in self.decks[1]:
-			self.decks[0].remove(p1_card)
-			self.decks[1].remove(p2_card)
+		# TODO: hands = [p1_hand, p2_hand]
+		# TODO: Add 'ALLOW_NONE' mode?
+		# TODO: What if both foul? considering player order is random, I think it's fine to fail the first.
 
-			payoffs = self.PAYOFF_TABLE[p1_card, p2_card]
+		if not p1_card or p1_card not in self.decks[0]:
+			self.current_round = self.total_rounds + 1  # TODO: gross hack to 'end' the game
+			self.scores = [-1, 1] # p1 loses
 
-			self.scores[0] += payoffs[0]
-			self.scores[1] += payoffs[1]
+			raise P1FoulException('invalid card')
 
-		else:
-			if p1_card not in self.decks[0]:
-				self.scores[0] += self.BAD_PLAY_COST
-				self.scores[1] += self.BAD_PLAY_REWARD
-			else:
-				self.decks[0].remove(p1_card)
+		if not p2_card or p2_card not in self.decks[1]:
+			self.current_round = self.total_rounds + 1  # TODO: gross hack to 'end' the game
+			self.scores = [1, -1] # p2 loses
 
-			if p2_card not in self.decks[1]:
-				self.scores[0] += self.BAD_PLAY_REWARD
-				self.scores[1] += self.BAD_PLAY_COST
-			else:
-				self.decks[1].remove(p2_card)
+			raise P2FoulException('invalid card')
+
+		self.decks[0].remove(p1_card)
+		self.decks[1].remove(p2_card)
+
+		payoffs = self.PAYOFF_TABLE[p1_card, p2_card]
+
+		self.scores[0] += payoffs[0]
+		self.scores[1] += payoffs[1]
 
 		self.current_round += 1
 
@@ -153,3 +157,21 @@ class GameGen2(BaseGame):
 	'''
 
 	GEN = 2
+
+
+class GameGen3(BaseGame):
+	'''
+	Gen2 but with more cards, KILL and PEAK.
+	'''
+
+	GEN = 3
+	CARDS = {'R', 'P', 'S', 'K', 'P'}
+
+
+class GameGen4(BaseGame):
+	'''
+	Gen3 but with card picking at the beginning.
+	'''
+
+	GEN = 4
+	CARDS = {'R', 'P', 'S', 'K', 'P'}
