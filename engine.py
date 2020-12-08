@@ -13,7 +13,7 @@ import queue
 
 from game import GameGen0, GameGen1, GameGen2, GameGen3
 from game import EverybodyDiesException, P1FoulException, P2FoulException
-from db import setupdb, save_pairing_result, save_tournament_result
+from db import setupdb, latest_engine_params, save_pairing_result, save_tournament_result
 
 LOGGER = logging.getLogger(__name__)
 
@@ -68,6 +68,8 @@ class Engine:
 	]
 
 	def __init__(self, tournament_id, gen, rounds):
+		LOGGER.info('Game params: gen=%r, rounds=%r', gen, rounds)
+
 		self.tournament_id = tournament_id
 		self.players = []
 
@@ -229,17 +231,10 @@ class Engine:
 
 def main():
 	tournament_id = sys.argv[1]
+	gen, rounds = latest_engine_params()
 
-	params = [
-		(0, 5, ),
-		(1, 6, ),
-		(2, 13, ),
-		(3, 13, ),
-	]
-
-	for gen, rounds in params:
-		engine = Engine("%s-%s" % (tournament_id, gen), gen, rounds)
-		engine.run()
+	engine = Engine("%s-%s" % (tournament_id, gen), gen, rounds)
+	engine.run()
 
 
 if __name__ == '__main__':

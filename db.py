@@ -4,6 +4,13 @@ DB_FILE = 'hack.db'
 
 SCHEMA = [
 '''
+create table if not exists engine (
+	generation integer not null,
+	rounds integer not null,
+	cr_date timestamp default current_timestamp
+);
+''',
+'''
 create table if not exists pairing_results (
 	id integer primary key,
 	tournament_id text not null,
@@ -35,6 +42,19 @@ def setupdb():
 
 	conn.commit()
 	conn.close()
+
+
+def latest_engine_params():
+	conn = sqlite3.connect(DB_FILE)
+	cur = conn.cursor()
+	cur.execute('select generation, rounds from engine order by cr_date desc limit 1')
+
+	params = cur.fetchone()
+
+	conn.commit()
+	conn.close()
+
+	return params or (0, 50)
 
 
 def save_pairing_result(tournament_id, gen, p1_bot_name, p1_score, p2_bot_name, p2_score, outcome):
