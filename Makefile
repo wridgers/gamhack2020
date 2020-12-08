@@ -13,7 +13,7 @@ clean:
 
 www/%.html: web/%.py hack.db
 	mkdir -p $(dir $@)
-	python $< > $@
+	python3 $< > $@
 
 www/%: web/%
 	mkdir -p $(dir $@)

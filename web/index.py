@@ -27,7 +27,7 @@ The protocol consists of:
 3. For each round:
 	1. You will receive a round header dictionary. This will contain at least the key `deck`, which tells you what you can choose to play from.
 	2. You must send a dictionary containing at least `hand`, which must be an element of `deck`.
-	3. The system will send you a round end response. This may contain the key ``"ended": True` which indicates this was the final round.
+	3. The system will send you a round end response. This may contain the key `"ended": True` which indicates this was the final round.
 4. After the final round, your `run` function must return.
 
 ## Logging
