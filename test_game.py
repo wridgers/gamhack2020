@@ -1,7 +1,7 @@
 import pytest
 
-from game import BaseGame, GameGen0, GameGen1, GameGen2
-from game import P1FoulException, P2FoulException, GameException
+from game import BaseGame, GameGen0, GameGen1, GameGen2, GameGen3
+from game import EverybodyDiesException, P1FoulException, P2FoulException, GameException
 
 
 @pytest.mark.parametrize('hands, exception, scores', [
@@ -139,3 +139,44 @@ def test_gen2_game():
 		game.apply(['P', 'S']) # p1 can't play P
 
 	assert game.final_scores() == [-1, 1]
+
+
+@pytest.mark.parametrize('deck, foul', [
+	[None, True],
+	[[], True],
+	[['R', 'R', 'R'], True],
+	[['R', 'R', 'P', 'P', 'R'], True],
+	[['R', 'R', 'P', 'P', '?'], True],
+	[['R', 'R', 'P', 'P', 'S'], False],
+])
+def test_gen2_setup(deck, foul):
+	game = GameGen2(['p1', 'p2'], 5)
+	assert game.pool == ['R', 'R', 'P', 'P', 'S', 'S']
+	assert game.total_rounds == 5
+
+	setup = {
+		'ready': True,
+	}
+
+	if deck:
+		setup['deck'] = deck
+
+	if foul:
+		with pytest.raises(P1FoulException):
+			game.setup(0, setup)
+
+	else:
+		game.setup(0, setup)
+
+
+def test_gen3_game_k():
+	game = GameGen3(['p1', 'p2'], 7)
+	game.decks = [
+		['R', 'R', 'P', 'P', 'S', 'S', 'K'],
+		['R', 'R', 'P', 'P', 'S', 'S', 'K'],
+	]
+
+	with pytest.raises(EverybodyDiesException):
+		game.apply(['K', 'K'])
+
+	assert game.final_scores() == [-1, -1]

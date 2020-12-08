@@ -1,10 +1,16 @@
 import logging
 import math
 
+from itertools import groupby
+
 LOGGER = logging.getLogger(__name__)
 
 
 class GameException(Exception):
+	pass
+
+
+class EverybodyDiesException(GameException):
 	pass
 
 
@@ -30,6 +36,14 @@ class BaseGame():
 
 		('S', 'R'): (0, 1),
 		('S', 'P'): (1, 0),
+
+		('K', 'R'): (1, 0),
+		('K', 'P'): (1, 0),
+		('K', 'S'): (1, 0),
+
+		('R', 'K'): (0, 1),
+		('P', 'K'): (0, 1),
+		('S', 'K'): (0, 1),
 	}
 
 	GEN = -1
@@ -63,19 +77,31 @@ class BaseGame():
 
 	def setup(self, player_idx, obj):
 		try:
-			assert obj['ready'], "not ready"
+			assert obj['ready'], 'not ready'
+
 
 			if 'deck' in obj:
-				assert self.pool, "no pool"
-				assert not self.decks[player_idx], "already has deck"
-				assert all(x in self.pool for x in obj['deck']), "invalid setup deck"
-				assert len(obj['deck']) == self.total_rounds, "incorrect deck size"
+				assert self.pool, 'no pool'
+				assert not self.decks[player_idx], 'already has deck'
+				assert len(obj['deck']) == self.total_rounds, 'incorrect deck size'
+
+				assert all(x in self.CARDS for x in obj['deck']), 'unknown card'
+				assert all(
+					len(list(group)) <= len([x for x in self.pool if x == card])
+					for card, group in groupby(sorted(obj['deck']))
+				), 'invalid setup deck'
+
+				for card in obj['deck']:
+					if card == 'K':
+						self.scores[player_idx] -= 1
+
 				self.decks[player_idx] = obj['deck']
 
+			else:
+				assert not self.pool, 'no deck supplied'
+
 		except AssertionError as e:
-			# TODO: gross hacks to 'end' the game
-			self.current_round = self.total_rounds + 1
-			self.scores = [[-1, 1], [1, -1]][player_idx]
+			self.end_in_favour_of(1 - player_idx)
 			raise [P1FoulException, P2FoulException][player_idx]() from e
 
 	def round_headers(self):
@@ -103,10 +129,12 @@ class BaseGame():
 
 		for player_idx, card in enumerate(cards):
 			if not card or card not in self.decks[player_idx]:
-				# gross hacks to 'end' the game
-				self.current_round = self.total_rounds + 1
-				self.scores = [[-1, 1], [1, -1]][player_idx]
+				self.end_in_favour_of(1 - player_idx)
 				raise [P1FoulException, P2FoulException][player_idx]('invalid card: %s' % (card, ))
+
+		if cards == ('K', 'K'):
+			self.end_in_favour_of(None)
+			raise EverybodyDiesException('both players played K')
 
 		payoffs = self.PAYOFF_TABLE[cards]
 
@@ -126,6 +154,17 @@ class BaseGame():
 			}
 			for player_idx in range(len(self.players))
 		]
+
+	def end_in_favour_of(self, player_idx):
+		self.current_round = self.total_rounds + 1
+
+		if player_idx == 0:
+			self.scores = [1, -1]
+		elif player_idx == 1:
+			self.scores = [-1, 1]
+		else:
+			self.scores = [-1, -1]
+
 
 	def final_scores(self):
 		if self.current_round <= self.total_rounds:
@@ -183,17 +222,22 @@ class GameGen2(BaseGame):
 
 	@property
 	def pool(self):
-		count = math.ceil(self.total_rounds / len(self.CARDS))
+		count = math.ceil(self.total_rounds / 3)
 		return ['R'] * count + ['P'] * count + ['S'] * count
 
 
 class GameGen3(BaseGame):
 	'''
-	Gen2 but with more cards, KILL, PEAK, and STEAL.
+	Gen2 but with more cards, KILL (K), LOOK (L), and TAKE (T).
 	'''
 
 	GEN = 3
-	CARDS = {'R', 'P', 'S', 'K', 'P'}
+	CARDS = {'R', 'P', 'S', 'K'}
+
+	@property
+	def pool(self):
+		count = math.ceil(self.total_rounds / 3)
+		return ['R'] * count + ['P'] * count + ['S'] * count + ['K']
 
 
 class GameGen4(BaseGame):

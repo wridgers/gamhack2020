@@ -10,8 +10,8 @@ import sys
 import threading
 import queue
 
-from game import GameGen0, GameGen1, GameGen2
-from game import P1FoulException, P2FoulException
+from game import GameGen0, GameGen1, GameGen2, GameGen3
+from game import EverybodyDiesException, P1FoulException, P2FoulException
 from db import setupdb, save_result
 
 LOGGER = logging.getLogger(__name__)
@@ -63,6 +63,7 @@ class Engine:
 		GameGen0,
 		GameGen1,
 		GameGen2,
+		GameGen3,
 	]
 
 	def __init__(self, tournament_id, gen, rounds):
@@ -154,6 +155,9 @@ class Engine:
 			for idx, player in enumerate(players):
 				player.join()
 
+		except EverybodyDiesException:
+			LOGGER.exception('EVERYBODY DIES.')
+
 		except P1FoulException:
 			LOGGER.exception('%s fouled' % (player_names[0], ))
 
@@ -181,6 +185,7 @@ def main():
 		(0, 5, ),
 		(1, 6, ),
 		(2, 13, ),
+		(3, 13, ),
 	]
 
 	for gen, rounds in params:
