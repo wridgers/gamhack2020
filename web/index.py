@@ -37,6 +37,10 @@ You don't run the code, the system does. You can get data in a few ways:
 - The [online logs directory](/logs) on this server.
 - `/home/gamhack/logs`, which just contains the same files.
 - `/home/gamhack/hack.db` which is an sqlite database.
+
+## Links
+
+- [recent pairings](/recent_pairings.html)
 '''
 
 
