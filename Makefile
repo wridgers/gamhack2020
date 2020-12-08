@@ -9,7 +9,8 @@ all: $(site_files)
 
 .PHONY: clean
 clean:
-	rm -rf www
+	rm -f www/index.html
+	rm -f www/recent_pairings.html
 
 www/%.html: web/%.py hack.db
 	mkdir -p $(dir $@)
