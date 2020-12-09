@@ -36,6 +36,11 @@ do
 		# update results on index.html ?
 	) |& tee ./www/logs/${tournament_id}.txt
 
+	if [ -n "$OFFICAL" ]; then
+		sqlite3 hack.db "insert into official (tournament_id) values ('$tournament_id');"
+		break
+	fi
+
 	# update www
 	make -j4
 
