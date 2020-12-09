@@ -101,21 +101,22 @@ Your `game_header` response (setup dict) must contain an additional key `deck` w
 
 Generation three sees the introduction of three new card types:
 
-- **C**hicken, Win any hand, unless you both play chicken and then **all players die** and are out of the tournament.
 - **L**ook, look at opponents deck.
+- **C**hicken, win any hand, unless you both play chicken and then **all players die** and are out of the tournament.
 - **T**ake, steal from opponents deck.
 
 #### Look
 
 - `round_footer` will contain a random sample of your opponents deck, size: `len(opponents deck) // 2`
-- Look eats Chicken
 - Payoff for any Look play is `(0, 0)`
+- Look is the only way not to lose to Chicken.
 
 #### Take
 
 - Take a card from opponent, after the card they just played is returned.
 - If both players Take, both Takes are eaten.
 - Payoff for any Take play is `(0, 1)`, 1 to the victim of theft.
+- This means you will finish the pairing with spare cards.
 
 #### Special Card Cost
 
