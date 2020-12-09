@@ -192,9 +192,12 @@ class BaseGame():
 			if cards[1 - player_idx] != 'T':
 				self.decks[1 - player_idx].append(cards[1 - player_idx])
 
-			stolen_card = random.choice(self.decks[1 - player_idx])
-			self.decks[1 - player_idx].remove(stolen_card)
-			self.decks[player_idx].append(stolen_card)
+			if self.decks[1 - player_idx]:
+				stolen_card = random.choice(self.decks[1 - player_idx])
+				self.decks[1 - player_idx].remove(stolen_card)
+				self.decks[player_idx].append(stolen_card)
+			else:
+				stolen_card = None
 
 			took.append(stolen_card)
 
