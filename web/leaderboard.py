@@ -4,9 +4,9 @@ import sqlite3
 from jinja2 import Template
 
 LEADERBOARD_QUERY = '''
-	select player, sum(elimination_round)
+	select player, sum(max(0,elimination_round*3+10))
 	from tournament_results
-	where cr_date >= datetime('now', '-1 hour')
+	where cr_date >= datetime('now', '-10 minute')
 	group by 1
 	order by 2 desc
 '''
