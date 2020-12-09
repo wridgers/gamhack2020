@@ -194,8 +194,10 @@ class BaseGame():
 				took.append(None)
 				continue
 
-			# return played card to target of theft
-			self.decks[1 - player_idx].append(cards[1 - player_idx])
+			# Return played card to target of theft
+			# Unless it's a steal.
+			if cards[1 - player_idx] != 'T':
+				self.decks[1 - player_idx].append(cards[1 - player_idx])
 
 			stolen_card = random.choice(self.decks[1 - player_idx])
 			self.decks[1 - player_idx].remove(stolen_card)
