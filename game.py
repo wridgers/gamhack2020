@@ -122,7 +122,7 @@ class BaseGame():
 
 	def look(self, player_idx):
 		deck = self.decks[player_idx]
-		look_size = min(len(deck), self.LOOK_SIZE)
+		look_size = len(deck) // 2
 		return random.sample(deck, look_size)
 
 	def apply(self, hands):
@@ -134,8 +134,8 @@ class BaseGame():
 		for player_idx, hand in enumerate(hands):
 			try:
 				assert hand is not None, 'hand must be played'
-				assert len(hand) == 1, 'hand size should be exactly one'
-				assert type(hand) == str, 'hand should be a str'
+				assert type(hand) == str, 'hand should be a str: %r' % (hand, )
+				assert len(hand) == 1, 'hand size should be exactly one: %r' % (hand, )
 
 			except AssertionError as e:
 				self.end_in_favour_of(1 - player_idx)
@@ -158,14 +158,14 @@ class BaseGame():
 			self.end_in_favour_of(None)
 			raise EverybodyDiesException('both players played CHICKEN')
 
+		elif any(looks):
+			payoffs = [0 if x else 0 for x in looks]
+
 		elif any(chickens):
 			payoffs = [1 if x else 0 for x in chickens]
 
 		elif not any(rps):
 			payoffs = [0] * len(self.players)
-
-		elif any(looks):
-			payoffs = [0 if x else 1 for x in looks]
 
 		elif any(thieves):
 			payoffs = [0 if x else 1 for x in thieves]
