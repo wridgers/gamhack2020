@@ -49,11 +49,6 @@ class BaseGame():
 	GEN = -1
 	CARDS = set()
 
-	RPS_COST = 0
-
-	CHICKEN_COST = 1
-
-	LOOK_COST = 5
 	LOOK_SIZE = 3
 
 	def __init__(self, players, rounds):
@@ -94,15 +89,12 @@ class BaseGame():
 					for card, group in groupby(sorted(obj['deck']))
 				), 'invalid setup deck'
 
-				for card in obj['deck']:
-					if card == 'C':
-						card_cost = self.CHICKEN_COST
-					elif card == 'L':
-						card_cost = self.LOOK_COST
-					else:
-						card_cost = self.RPS_COST
+				card_cost = 0.0
 
-					self.scores[player_idx] -= card_cost
+				for card in obj['deck']:
+					if card not in ('R', 'P', 'S'):
+						self.scores[player_idx] -= card_cost
+						card_cost += 0.5
 
 				# assert self.scores[player_idx] >= 0, 'over-bought'
 
