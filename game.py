@@ -143,6 +143,7 @@ class BaseGame():
 			try:
 				assert hand is not None, 'hand must be played'
 				assert len(hand) == 1, 'hand size should be exactly one'
+				assert type(hand) == str, 'hand should be a str'
 
 			except AssertionError as e:
 				self.end_in_favour_of(1 - player_idx)
