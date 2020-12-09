@@ -87,6 +87,11 @@ Your `game_header` response (setup dict) must contain an additional key `deck` w
 - `deck` must be a subset of `pool`
 - `deck` must be the same length as the number of rounds
 
+#### Examples
+
+- `{'gen': 2, 'rounds': 17, 'pool': ['R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'], 'players': ['ralphabot', 'team5']}`
+- `{'ready': True, 'deck': ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R']}`
+
 ''',
 
 # GEN 3 ########################################################################
