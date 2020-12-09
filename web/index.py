@@ -99,7 +99,9 @@ Your `game_header` response (setup dict) must contain an additional key `deck` w
 '''
 ### Generation 3
 
-TODO
+#### Special Card Cost
+
+The first special card is free. After that, each special card costs 0.5 points more than the last. This means if you pick `n` special cards, the total cost will be `n(n-1)/4`. Noting that each win gains you 1 point, you should not pick too many special cards!
 ''',
 ]
 
