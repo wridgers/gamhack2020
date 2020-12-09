@@ -19,6 +19,7 @@ class Player(base.Player):
 		players = header['players']
 
 		idx = players.index('arbiebot')
+		opp = players[1 - idx]
 
 		setup = {
 			'ready': True,
@@ -27,7 +28,7 @@ class Player(base.Player):
 
 		self.send(setup)
 
-		original_pool = header['pool'].copy()
+		original_pool = header['pool'].copy() if opp != 'chickenbot' else ['C'] * len(header['pool'])
 		opp_plays = []
 
 		for _ in range(rounds):
@@ -35,8 +36,12 @@ class Player(base.Player):
 			deck = round_header['deck'].copy()
 
 			opp_potential = original_pool.copy()
+
 			for x in opp_plays:
-				opp_potential.remove(x)
+				try:
+					opp_potential.remove(x)
+				except ValueError:
+					pass
 
 			counts = {
 				card: len(list(cards))
