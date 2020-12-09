@@ -14,8 +14,8 @@ clean:
 
 www/%.html: web/%.py hack.db
 	mkdir -p $(dir $@)
-	python3 $< > tmp
-	cp tmp $@
+	python3 $< > $@.tmp
+	cp $@.tmp $@
 
 www/%: web/%
 	mkdir -p $(dir $@)
