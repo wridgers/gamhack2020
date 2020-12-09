@@ -121,6 +121,10 @@ Generation three sees the introduction of three new card types:
 #### Special Card Cost
 
 The first special card is free. After that, each special card costs 0.5 points more than the last. This means if you pick `n` special cards, the total cost will be `n(n-1)/4`. Noting that each win gains you 1 point, you should not pick too many special cards!
+
+#### Special Rule
+
+It's legal to pick a hand entirely composed of Chicken, regardless of what is in the pool.
 ''',
 ]
 
@@ -130,6 +134,7 @@ FOOTER = '''
 As we change parts of the game (e.g. fix bugs, balance issues) we will try to update this section (and announce in Mattermost).
 
 - 10:55, numpy installed
+- 15:19, Clarified Ultimate Chicken Exemption
 
 ## Logging
 
