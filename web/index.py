@@ -111,6 +111,10 @@ You don't run the code, the system does. You can get data in a few ways:
 
 - [test cases](/tests.html)
 
+## Leaderboard
+
+- [leaderboard](/leaderboard.html)
+
 ## Source code dumps
 
 (Will 404 until we make them!)
