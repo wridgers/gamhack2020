@@ -80,7 +80,13 @@ Each players deck is now the size of `rounds` and consists of exactly equal quan
 '''
 ### Generation 2
 
-TODO
+The `game_header` will contain an additional `pool` key which contains a list of cards, larger than the number of rounds. The pool is the same for both players, but not shared.
+
+Your `game_header` response (setup dict) must contain an additional key `deck` which contains the cards you are going to play with.
+
+- `deck` must be a subset of `pool`
+- `deck` must be the same length as the number of rounds
+
 ''',
 
 # GEN 3 ########################################################################
