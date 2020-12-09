@@ -43,10 +43,10 @@ class Player(base.Player):
 				for card, cards in groupby(opp_potential)
 			}
 
-			 LOGGER.info('Orig. pool=%r', original_pool)
-			 LOGGER.info('Opp. plays=%r', opp_plays)
-			 LOGGER.info('Opp. poss.=%r', opp_potential)
-			 LOGGER.info('Counts    =%r', counts)
+			LOGGER.info('Orig. pool=%r', original_pool)
+			LOGGER.info('Opp. plays=%r', opp_plays)
+			LOGGER.info('Opp. poss.=%r', opp_potential)
+			LOGGER.info('Counts    =%r', counts)
 
 			most_likely = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:1]
 
