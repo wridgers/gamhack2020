@@ -178,6 +178,61 @@ PROTOCOL_RULES = ['''
 '''
 ### Generation 3
 
+	def test_gen3_game_k():
+		game = GameGen3(['p1', 'p2'], 7)
+		game.decks = [
+			['R', 'R', 'P', 'P', 'S', 'S', 'C'],
+			['R', 'R', 'P', 'P', 'S', 'S', 'C'],
+		]
+	
+		with pytest.raises(EverybodyDiesException):
+			game.apply(['C', 'C'])
+	
+		assert game.final_scores() == [-1, -1]
+	
+	
+	def test_gen3_game_l():
+		game = GameGen3(['p1', 'p2'], 4)
+		game.decks = [
+			['R', 'R', 'R', 'L'],
+			['P', 'R', 'P', 'L'],
+		]
+		compare = lambda x, y: collections.Counter(x) == collections.Counter(y)
+	
+	
+		p1_response, p2_response = game.apply(['L', 'P'])
+		assert compare(p1_response['look'], ['P', 'R', 'L'])
+		assert 'look' not in p2_response
+	
+		assert game.scores == [0, 1]
+	
+		p1_response, p2_response = game.apply(['R', 'L'])
+		assert 'look' not in p1_response
+		assert compare(p2_response['look'], ['R', 'R'])
+	
+		assert game.scores == [1, 1]
+	
+	
+	def test_gen3_game_t():
+		game = GameGen3(['p1', 'p2'], 2)
+		game.decks = [
+			['R', 'T'],
+			['P', 'S'],
+		]
+	
+		p1_response, p2_response = game.apply(['T', 'S'])
+	
+		assert p1_response['took'] in ('P', 'S')
+	
+		assert 'took' not in p2_response
+	
+		# there's only one hand left, but the thief is a card up
+		assert len(game.decks[0]) == 2
+	
+		# p2 only has left what p1 didn't steal
+		p2_deck = ['P', 'S']
+		p2_deck.remove(p1_response['took'])
+		assert game.decks[1] == p2_deck
 ''',
 ]
 
