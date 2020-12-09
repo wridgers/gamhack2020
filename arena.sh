@@ -39,10 +39,5 @@ do
 	# update www
 	make -j4
 
-	winner=$(sqlite3 hack.db "select player from tournament_results where elimination_round = 0 and player like 'team%' order by tournament_id limit 1")
-	if [ -n "$winner" ]; then
-		break
-	fi
-
 	sleep 1
 done
