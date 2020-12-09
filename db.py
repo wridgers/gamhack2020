@@ -9,6 +9,7 @@ create table if not exists aliases (
 	alias text not null unique
 );
 ''',
+'create table if not exists official (id integer primary key, tournament_id text not null);',
 '''
 insert or ignore into aliases (player, alias) values
 	('alphabot', 'alphabot'),

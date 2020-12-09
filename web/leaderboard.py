@@ -11,6 +11,14 @@ LEADERBOARD_QUERY = '''
 	order by 2 desc
 '''
 
+OFFICIAL_LEADERBOARD_QUERY = '''
+	select player, sum(max(0,elimination_round*3+10))
+	from tournament_results
+	join official using (tournament_id)
+	group by 1
+	order by 2 desc
+'''
+
 TEMPLATE = '''<html>
 	<head>
 		<style>
@@ -21,6 +29,8 @@ TEMPLATE = '''<html>
 	</head>
 
 	<body>
+		<h2>Last 10 mins</h2>
+
 		<table>
 			<thead>
 				<tr>
@@ -32,6 +42,28 @@ TEMPLATE = '''<html>
 
 			<tbody>
 				{% for result in leaderboard %}
+					<tr>
+						<td>{{ loop.index }}</td>
+						<td>{{ result[0] }}</td>
+						<td>{{ result[1] }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+
+		<h2>Official Only</h2>
+
+		<table>
+			<thead>
+				<tr>
+					<th>pos</th>
+					<th>team</th>
+					<th>score</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				{% for result in official_leaderboard %}
 					<tr>
 						<td>{{ loop.index }}</td>
 						<td>{{ result[0] }}</td>
@@ -53,13 +85,15 @@ def main():
 	cur = conn.cursor()
 	cur.execute(LEADERBOARD_QUERY)
 	leaderboard = cur.fetchall()
+	cur.execute(OFFICIAL_LEADERBOARD_QUERY)
+	official_leaderboard = cur.fetchall()
 
 	conn.commit()
 	conn.close()
 
 	template = Template(TEMPLATE)
 
-	print(template.render(leaderboard=leaderboard, now=str(dt.datetime.now())))
+	print(template.render(leaderboard=leaderboard, official_leaderboard=official_leaderboard, now=str(dt.datetime.now())))
 
 
 if __name__ == '__main__':
