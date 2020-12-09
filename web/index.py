@@ -97,6 +97,8 @@ FOOTER = '''
 
 As we change parts of the game (e.g. fix bugs, balance issues) we will try to update this section (and announce in Mattermost).
 
+- 10:55, numpy installed
+
 ## Logging
 
 You don't run the code, the system does. You can get data in a few ways:
