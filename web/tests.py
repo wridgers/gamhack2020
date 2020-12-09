@@ -121,6 +121,56 @@ PROTOCOL_RULES = ['''
 '''
 ### Generation 2
 
+    def test_gen2_game():
+    	game = GameGen2(['p1', 'p2'], 3)
+    	game.decks = [['R', 'R', 'R'], ['S', 'S', 'S']]
+    
+    	game_header = game.game_header()
+    	assert game_header['gen'] == 2
+    	assert game_header['rounds'] == 3
+    	assert game_header['players'] == ['p1', 'p2']
+    
+    	game.apply(['R', 'S'])
+    	game.apply(['R', 'S'])
+    
+    	p1_header, p2_header = game.round_headers()
+    	assert p1_header['round'] == 3
+    	assert p1_header['deck'] == ['R']
+    	assert p2_header['round'] == 3
+    	assert p2_header['deck'] == ['S']
+    
+    	with pytest.raises(P1FoulException):
+    		game.apply(['P', 'S']) # p1 can't play P
+    
+    	assert game.final_scores() == [-1, 1]
+    
+    
+    @pytest.mark.parametrize('deck, foul', [
+    	[None, True],
+    	[[], True],
+    	[['R', 'R', 'R'], True],
+    	[['R', 'R', 'P', 'P', 'R'], True],
+    	[['R', 'R', 'P', 'P', '?'], True],
+    	[['R', 'R', 'P', 'P', 'S'], False],
+    ])
+    def test_gen2_setup(deck, foul):
+    	game = GameGen2(['p1', 'p2'], 5)
+    	assert game.pool == ['R', 'R', 'P', 'P', 'S', 'S']
+    	assert game.total_rounds == 5
+    
+    	setup = {
+    		'ready': True,
+    	}
+    
+    	if deck:
+    		setup['deck'] = deck
+    
+    	if foul:
+    		with pytest.raises(P1FoulException):
+    			game.setup(0, setup)
+    
+    	else:
+    		game.setup(0, setup)
 ''',
 
 # GEN 3 ########################################################################
