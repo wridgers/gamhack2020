@@ -43,12 +43,13 @@ class Player(base.Player):
 				for card, cards in groupby(opp_potential)
 			}
 
+			most_likely = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:1]
+
 			LOGGER.info('Orig. pool=%r', original_pool)
 			LOGGER.info('Opp. plays=%r', opp_plays)
 			LOGGER.info('Opp. poss.=%r', opp_potential)
 			LOGGER.info('Counts    =%r', counts)
-
-			most_likely = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:1]
+			LOGGER.info('Prediciton=%r', most_likely)
 
 			if not most_likely:
 				hand = random.choice(deck)
