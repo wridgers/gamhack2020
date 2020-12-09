@@ -101,13 +101,9 @@ As we change parts of the game (e.g. fix bugs, balance issues) we will try to up
 
 You don't run the code, the system does. You can get data in a few ways:
 
-- The [online logs directory](/logs) on this server.
+- [recent pairings](/recent_pairings.html) which shows recent pairings and has lings to tournament log files.
 - `/home/gamhack/logs`, which just contains the same files.
 - `/home/gamhack/hack.db` which is an sqlite database.
-
-## Links
-
-- [recent pairings](/recent_pairings.html)
 
 ## Source code dumps
 
