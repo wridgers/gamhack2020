@@ -162,9 +162,13 @@ class Engine:
 
 		players = []
 		for idx, player_name in enumerate(player_names):
-			player = self.make_player(idx + 1, player_name)
-			player.start()
-			players.append(player)
+			try:
+				player = self.make_player(idx + 1, player_name)
+				player.start()
+				players.append(player)
+			except:
+				logging.exception('Player %s could not be loaded. FOUL.', player_name)
+				return 2 - idx
 
 		try:
 			game = self.game_classes[self.gen](player_names, self.rounds)
