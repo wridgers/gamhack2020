@@ -289,8 +289,8 @@ class GameGen3(GameGen2):
 
 	@property
 	def pool(self):
-		count = math.ceil(self.total_rounds / 3)
-		return ['R'] * count + ['P'] * count + ['S'] * count + ['C'] + ['L'] + ['T']
+		count = math.ceil(self.total_rounds / 2)
+		return ['R'] * count + ['P'] * count + ['S'] * count + ['C'] * 2 + ['L'] * 2 + ['T'] * 2
 
 
 class GameGen4(GameGen3):
