@@ -4,6 +4,31 @@ DB_FILE = 'hack.db'
 
 SCHEMA = [
 '''
+create table if not exists aliases (
+	player text not null unique,
+	alias text not null unique
+);
+''',
+'''
+insert or ignore into aliases (player, alias) values
+	('alphabot', 'alphabot'),
+	('copybot', 'copybot'),
+	('hahbot', 'hahbot'),
+	('lightningbot', 'lightningbot'),
+	('midbot', 'midbot'),
+	('ralphabot', 'ralphabot'),
+	('scatterbot', 'scatterbot'),
+
+	('team1', 'team1'),
+	('team2', 'team2'),
+	('team3', 'team H.A.R.D.'),
+	('team4', 'Big Brain Team'),
+	('team5', 'team5'),
+	('team6', 'AMD'),
+	('team7', 'team7')
+;
+''',
+'''
 create table if not exists engine (
 	generation integer not null,
 	rounds integer not null,
