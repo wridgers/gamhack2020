@@ -57,7 +57,7 @@ def main():
 	conn = sqlite3.connect('hack.db')
 
 	cur = conn.cursor()
-	cur.execute('select * from pairing_results order by t desc limit 100')
+	cur.execute('select * from pairing_results order by cr_date desc limit 100')
 	results = cur.fetchall()
 
 	conn.commit()

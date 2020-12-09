@@ -20,7 +20,7 @@ create table if not exists pairing_results (
 	p2 text not null,
 	p2_score integer not null,
 	outcome text not null,
-	t timestamp default current_timestamp
+	cr_date timestamp default current_timestamp
 );
 ''',
 '''
@@ -28,7 +28,8 @@ create table if not exists tournament_results (
 	id integer primary key,
 	tournament_id text not null,
 	player text not null,
-	elimination_round integer not null
+	elimination_round integer not null,
+	cr_date timestamp default current_timestamp
 );
 ''',
 ]
