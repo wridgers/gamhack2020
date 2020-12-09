@@ -10,15 +10,23 @@ while :
 do
 	tournament_id=$(date +%s)
 
+	echo "Begin round $tournament_id"
+
+	for i in `seq 1 7`; do
+		echo "Checking out team$i"
+		(
+			cd bots/team$i
+			git fetch
+			git reset --hard origin/master
+			git clean -f
+		)
+	done
+
 	(
-		echo "Begin round $tournament_id"
 		for i in `seq 1 7`; do
-			echo "Checking out team$i"
 			(
 				cd bots/team$i
-				git fetch
-				git reset --hard origin/master
-				git clean -f
+				echo "Team$i is running: $(git rev-parse HEAD)"
 			)
 		done
 
