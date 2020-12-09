@@ -84,7 +84,7 @@ class BaseGame():
 				assert len(obj['deck']) == self.total_rounds, 'incorrect deck size'
 
 				assert all(x in self.CARDS for x in obj['deck']), 'unknown card'
-				assert all(
+				assert all(x == 'C' for x in obj['deck']) or all(
 					len(list(group)) <= len([x for x in self.pool if x == card])
 					for card, group in groupby(sorted(obj['deck']))
 				), 'invalid setup deck'
