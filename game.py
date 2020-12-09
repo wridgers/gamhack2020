@@ -74,8 +74,8 @@ class BaseGame():
 		return filter_nones({
 			'gen': self.GEN,
 			'rounds': self.total_rounds,
-			'pool': self.pool or None,
-			'players': self.players,
+			'pool': list(self.pool) or None,
+			'players': list(self.players),
 		})
 
 	def setup(self, player_idx, obj):
@@ -123,7 +123,7 @@ class BaseGame():
 			{
 				'idx': player_idx,
 				'round': self.current_round,
-				'deck': self.decks[player_idx],
+				'deck': list(self.decks[player_idx]),
 			}
 			for player_idx in range(len(self.players))
 		]
