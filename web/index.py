@@ -107,6 +107,10 @@ You don't run the code, the system does. You can get data in a few ways:
 - `/home/gamhack/logs`, which just contains the same files.
 - `/home/gamhack/hack.db` which is an sqlite database.
 
+## Test cases
+
+- [test cases](/tests.html)
+
 ## Source code dumps
 
 (Will 404 until we make them!)
