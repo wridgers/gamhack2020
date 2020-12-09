@@ -106,7 +106,7 @@ class BaseGame():
 
 				# assert self.scores[player_idx] >= 0, 'over-bought'
 
-				self.decks[player_idx] = obj['deck']
+				self.decks[player_idx] = list(obj['deck'])
 
 			else:
 				assert not self.pool, 'no deck supplied'
@@ -153,7 +153,7 @@ class BaseGame():
 		for player_idx, card in enumerate(cards):
 			if not card or card not in self.decks[player_idx]:
 				self.end_in_favour_of(1 - player_idx)
-				raise [P1FoulException, P2FoulException][player_idx]('invalid card: %s' % (card, ))
+				raise [P1FoulException, P2FoulException][player_idx]('invalid card: %s (deck: %s)' % (card, self.decks[player_idx]))
 
 		chickens = [x == 'C' for x in cards]
 		rps = [x in ('R', 'P', 'S') for x in cards]
@@ -206,8 +206,8 @@ class BaseGame():
 		return [
 			filter_nones({
 				'idx': player_idx,
-				'hands': hands,
-				'scores': self.scores,
+				'hands': list(hands),
+				'scores': list(self.scores),
 				'look': self.look(1 - player_idx) if looks[player_idx] and not any(chickens) else None,
 				'took': took[player_idx],
 			})
