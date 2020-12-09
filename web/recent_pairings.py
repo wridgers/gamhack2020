@@ -16,16 +16,16 @@ TEMPLATE = '''<html>
 		<table style="width: 100%;">
 			<thead>
 				<tr>
-					<td>id</td>
-					<td>tournament id</td>
-					<td>gen</td>
-					<td>p1</td>
-					<td>p1 score</td>
-					<td>p2</td>
-					<td>p2 score</td>
-					<td>outcome</td>
-					<td>when</td>
-					<td>logs id</td>
+					<th>id</th>
+					<th>tournament id</th>
+					<th>gen</th>
+					<th>p1</th>
+					<th>p1 score</th>
+					<th>p2</th>
+					<th>p2 score</th>
+					<th>outcome</th>
+					<th>when</th>
+					<th>logs id</th>
 				</tr>
 			</thead>
 
